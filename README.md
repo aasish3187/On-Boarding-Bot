@@ -4,6 +4,19 @@ OnboardBot is an intelligent, full-stack employee self-service chatbot designed 
 
 ---
 
+## 📸 Screenshots
+
+### 🔑 Premium Glassmorphism Login
+![OnboardBot Login](screenshots/login.png)
+
+### 💬 Conversational Chat Assistant
+![OnboardBot Chat](screenshots/chat.png)
+
+### 📅 Interactive Leave Request Form (Widget)
+![Leave Request Widget](screenshots/leave_widget.png)
+
+---
+
 ## 🌟 Problems Solved
 
 Traditionally, onboarding systems and conversational chatbots suffer from three major problems:
