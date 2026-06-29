@@ -1,0 +1,86 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply text-on-background min-h-screen font-sans;
+    background-color: #031427;
+  }
+}
+
+/* Moving mesh gradient background */
+.mesh-bg {
+    background-color: #031427;
+    background-image: 
+        radial-gradient(at 0% 0%, hsla(213, 85%, 20%, 1) 0px, transparent 50%),
+        radial-gradient(at 100% 100%, hsla(240, 70%, 15%, 1) 0px, transparent 50%),
+        radial-gradient(at 100% 0%, hsla(175, 50%, 25%, 0.8) 0px, transparent 50%),
+        radial-gradient(at 0% 100%, hsla(260, 60%, 20%, 0.9) 0px, transparent 50%);
+    background-size: 200% 200%;
+    animation: meshAnimation 15s ease infinite alternate;
+}
+
+@keyframes meshAnimation {
+    0% { background-position: 0% 0%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 100%; }
+}
+
+/* Glass panel styling */
+.glass-panel {
+    background: rgba(3, 20, 39, 0.4);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    box-shadow: inset 1px 1px 0px 0px rgba(255, 255, 255, 0.15), 
+                inset -1px -1px 0px 0px rgba(0, 0, 0, 0.1),
+                0 8px 32px rgba(0, 0, 0, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Scrollbar customizations */
+.chat-scroll::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+.chat-scroll::-webkit-scrollbar-track {
+    background: transparent;
+}
+.chat-scroll::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+}
+.chat-scroll::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+/* Ambient Background Mesh Blobs */
+@keyframes floatMesh {
+    0% { transform: translate(0, 0) scale(1); opacity: 0.6; }
+    33% { transform: translate(5%, 10%) scale(1.1); opacity: 0.8; }
+    66% { transform: translate(-5%, 5%) scale(0.9); opacity: 0.5; }
+    100% { transform: translate(0, 0) scale(1); opacity: 0.6; }
+}
+
+.mesh-blob {
+    position: absolute;
+    filter: blur(100px);
+    border-radius: 50%;
+    z-index: 0;
+    pointer-events: none;
+    animation: floatMesh 20s infinite ease-in-out alternate;
+}
+
+/* Fade-in animation */
+@keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+.animate-fade-in-up {
+    animation: fadeInUp 0.4s ease-out forwards;
+    opacity: 0;
+}
+
+.animate-spin-slow {
+    animation: spin 3s linear infinite;
+}
