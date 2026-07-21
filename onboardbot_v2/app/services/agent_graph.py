@@ -38,6 +38,8 @@ def supervisor_router(state: OnboardState) -> Dict[str, Any]:
     last_msg = state["messages"][-1]["content"]
     if last_msg.startswith("ACTION:SUBMIT_LEAVE|"):
         return {"next_node": "knowledge_rag"}
+    if last_msg.startswith("ACTION:SUBMIT_IT|"):
+        return {"next_node": "it_provisioner"}
         
     try:
         structured_llm = llm.with_structured_output(RoutingDecision)
@@ -116,7 +118,28 @@ def knowledge_rag_node(state: OnboardState) -> Dict[str, Any]:
     return {"messages": state["messages"] + [{"sender": "knowledge_rag", "content": response.content}], "next_node": "compliance_auditor"}
 
 def it_provisioner_node(state: OnboardState) -> Dict[str, Any]:
-    return {"messages": state["messages"] + [{"sender": "it_provisioner", "content": "System access request registered. Flagging for HR authorization."}], "risk_flag": True, "next_node": "compliance_auditor"}
+    query = state["messages"][-1]["content"]
+    
+    # 0. Check for Form Submission
+    if query.startswith("ACTION:SUBMIT_IT|"):
+        try:
+            parts = query.split("|")
+            tools = parts[1].split(":")[1]
+            return {
+                "messages": state["messages"] + [{"sender": "it_provisioner", "content": f"I've registered your request for access to: {tools}. Escalating to HR for approval."}],
+                "risk_flag": True,
+                "provisioning_payload": {"req": f"IT Provisioning: {tools}"},
+                "next_node": "compliance_auditor"
+            }
+        except Exception as e:
+            print(f"[IT Form Parse Error] {e}")
+
+    # 1. Trigger the form widget
+    return {
+        "messages": state["messages"] + [{"sender": "it_provisioner", "content": "WIDGET:IT_PROVISION_FORM"}],
+        "risk_flag": False,
+        "next_node": "compliance_auditor"
+    }
 
 def conversational_node(state: OnboardState) -> Dict[str, Any]:
     query = state["messages"][-1]["content"]

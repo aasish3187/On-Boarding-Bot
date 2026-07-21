@@ -210,3 +210,72 @@ def get_approval_status(id: str, db: Session = Depends(get_db)):
     if not approval:
         raise HTTPException(status_code=404, detail="Approval request not found")
     return {"status": approval.status}
+
+# Simple in-memory settings store for mock demo purposes
+settings_db = {
+    "core_hours": "10:00 AM to 4:00 PM",
+    "hr_contact": "Sarah Jenkins",
+    "hr_email": "s.jenkins@company.com",
+    "documents_required": "Signed employment contract, Direct deposit form, Government ID"
+}
+
+class SettingsUpdatePayload(BaseModel):
+    core_hours: str
+    hr_contact: str
+    hr_email: str
+    documents_required: str
+
+class CustomApprovalPayload(BaseModel):
+    employee_id: str
+    action_type: str
+    req_details: str
+
+@router.get("/users")
+def get_all_users(db: Session = Depends(get_db)):
+    users = db.query(User).all()
+    return [
+        {
+            "id": u.id,
+            "email": u.email,
+            "name": u.name,
+            "role": u.role,
+            "department": u.department or "General"
+        }
+        for u in users
+    ]
+
+@router.get("/settings")
+def get_settings():
+    return settings_db
+
+@router.post("/settings")
+def update_settings(payload: SettingsUpdatePayload):
+    settings_db["core_hours"] = payload.core_hours
+    settings_db["hr_contact"] = payload.hr_contact
+    settings_db["hr_email"] = payload.hr_email
+    settings_db["documents_required"] = payload.documents_required
+    return {"status": "success", "settings": settings_db}
+
+@router.post("/approvals")
+def create_custom_approval(payload: CustomApprovalPayload, db: Session = Depends(get_db)):
+    user = db.query(User).filter(User.id == payload.employee_id).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="Employee not found")
+        
+    approval_id = str(uuid.uuid4())
+    db.add(PendingApproval(
+        id=approval_id,
+        employee_id=user.id,
+        action_type=payload.action_type,
+        payload={"req": payload.req_details}
+    ))
+    db.commit()
+    
+    # Broadcast ticket creation
+    run_sync(manager.broadcast({
+        "type": "approval_created",
+        "employee_id": user.id,
+        "ticket_id": approval_id
+    }))
+    
+    return {"status": "success", "ticket_id": approval_id}

@@ -23,6 +23,17 @@ export default function DashboardScreen({ user, onLogout }) {
   const [activeDecision, setActiveDecision] = useState(null);
   const [activeTab, setActiveTab] = useState("approvals");
 
+  // New features state
+  const [employees, setEmployees] = useState([]);
+  const [settings, setSettings] = useState({
+    core_hours: "",
+    hr_contact: "",
+    hr_email: "",
+    documents_required: ""
+  });
+  const [showNewRequest, setShowNewRequest] = useState(false);
+  const [newRequestForm, setNewRequestForm] = useState({ employee_id: "", action_type: "provisioning", req_details: "" });
+
   const addToast = (message, type = "success") => {
     const id = Date.now();
     setToasts((prev) => [...prev, { id, message, type }]);
@@ -63,6 +74,74 @@ export default function DashboardScreen({ user, onLogout }) {
     }
   };
 
+  const fetchEmployees = async () => {
+    setIsLoading(true);
+    try {
+      const response = await fetch("http://localhost:8000/api/v1/users");
+      if (!response.ok) throw new Error("Failed to load employees");
+      const data = await response.json();
+      setEmployees(data);
+    } catch (err) {
+      console.error(err);
+      addToast("Failed to fetch employee list", "error");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const fetchSettings = async () => {
+    setIsLoading(true);
+    try {
+      const response = await fetch("http://localhost:8000/api/v1/settings");
+      if (!response.ok) throw new Error("Failed to load settings");
+      const data = await response.json();
+      setSettings(data);
+    } catch (err) {
+      console.error(err);
+      addToast("Failed to fetch settings", "error");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const saveSettings = async (e) => {
+    e.preventDefault();
+    setIsLoading(true);
+    try {
+      const response = await fetch("http://localhost:8000/api/v1/settings", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(settings)
+      });
+      if (!response.ok) throw new Error("Failed to save settings");
+      addToast("Settings updated successfully", "success");
+    } catch (err) {
+      console.error(err);
+      addToast("Failed to save settings", "error");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const createCustomRequest = async (e) => {
+    e.preventDefault();
+    try {
+      const response = await fetch("http://localhost:8000/api/v1/approvals", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(newRequestForm)
+      });
+      if (!response.ok) throw new Error("Failed to create request");
+      addToast("New approval ticket created successfully", "success");
+      setShowNewRequest(false);
+      setNewRequestForm({ employee_id: "", action_type: "provisioning", req_details: "" });
+      fetchPendingApprovals();
+    } catch (err) {
+      console.error(err);
+      addToast("Failed to create approval ticket", "error");
+    }
+  };
+
   useEffect(() => {
     fetchPendingApprovals();
 
@@ -87,6 +166,16 @@ export default function DashboardScreen({ user, onLogout }) {
       ws.close();
     };
   }, []);
+
+  useEffect(() => {
+    if (activeTab === "employees") {
+      fetchEmployees();
+    } else if (activeTab === "company" || activeTab === "settings") {
+      fetchSettings();
+    } else if (activeTab === "approvals") {
+      fetchPendingApprovals();
+    }
+  }, [activeTab]);
 
   const handleAction = async (id, action, note = "") => {
     try {
@@ -135,33 +224,64 @@ export default function DashboardScreen({ user, onLogout }) {
           <p className="text-xs text-on-surface-variant opacity-80">OnboardBot Concierge</p>
         </div>
 
-        <button className="w-full py-3 mb-6 bg-primary-container text-white rounded-lg shadow-[0_0_15px_rgba(180,197,255,0.3)] hover:shadow-[0_0_25px_rgba(180,197,255,0.5)] hover:brightness-110 transition-all active:scale-[0.98] flex items-center justify-center gap-2 text-sm font-semibold border border-white/10">
+        <button 
+          onClick={() => setShowNewRequest(true)}
+          className="w-full py-3 mb-6 bg-primary-container text-white rounded-lg shadow-[0_0_15px_rgba(180,197,255,0.3)] hover:shadow-[0_0_25px_rgba(180,197,255,0.5)] hover:brightness-110 transition-all active:scale-[0.98] flex items-center justify-center gap-2 text-sm font-semibold border border-white/10"
+        >
           <Plus className="w-4 h-4" />
           New Request
         </button>
-
+ 
         <nav className="flex flex-col gap-1 flex-grow text-left">
-          {/* Active Tab */}
-          <a className="flex items-center gap-3 px-4 py-3 rounded-lg bg-primary-container/35 text-primary border-l-4 border-primary text-xs font-mono uppercase tracking-wider transition-all" href="#">
+          <button 
+            onClick={() => setActiveTab("approvals")}
+            className={`flex items-center gap-3 px-4 py-3 rounded-lg text-xs font-mono uppercase tracking-wider transition-all border-l-4 w-full text-left ${
+              activeTab === "approvals" || activeTab === "history" 
+                ? "bg-primary-container/35 text-primary border-l-primary" 
+                : "text-on-surface-variant opacity-80 hover:bg-white/5 hover:opacity-100 border-l-transparent"
+            }`}
+          >
             <ShieldCheck className="w-5 h-5" />
             Approvals
-          </a>
-          {/* Inactive Tabs */}
-          <a className="flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant opacity-80 hover:bg-white/5 hover:opacity-100 text-xs font-mono uppercase tracking-wider transition-all border-l-4 border-transparent" href="#">
+          </button>
+          
+          <button 
+            onClick={() => setActiveTab("employees")}
+            className={`flex items-center gap-3 px-4 py-3 rounded-lg text-xs font-mono uppercase tracking-wider transition-all border-l-4 w-full text-left ${
+              activeTab === "employees" 
+                ? "bg-primary-container/35 text-primary border-l-primary" 
+                : "text-on-surface-variant opacity-80 hover:bg-white/5 hover:opacity-100 border-l-transparent"
+            }`}
+          >
             <Briefcase className="w-5 h-5" />
             Employee Details
-          </a>
-          <a className="flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant opacity-80 hover:bg-white/5 hover:opacity-100 text-xs font-mono uppercase tracking-wider transition-all border-l-4 border-transparent" href="#">
+          </button>
+          
+          <button 
+            onClick={() => setActiveTab("company")}
+            className={`flex items-center gap-3 px-4 py-3 rounded-lg text-xs font-mono uppercase tracking-wider transition-all border-l-4 w-full text-left ${
+              activeTab === "company" 
+                ? "bg-primary-container/35 text-primary border-l-primary" 
+                : "text-on-surface-variant opacity-80 hover:bg-white/5 hover:opacity-100 border-l-transparent"
+            }`}
+          >
             <Building className="w-5 h-5" />
             Company Details
-          </a>
+          </button>
         </nav>
-
+ 
         <div className="mt-auto flex flex-col gap-1 pt-4 border-t border-white/10 text-left">
-          <a className="flex items-center gap-3 px-4 py-2 rounded-lg text-on-surface-variant opacity-80 hover:bg-white/5 hover:opacity-100 text-xs font-mono uppercase tracking-wider transition-all border-l-4 border-transparent" href="#">
+          <button 
+            onClick={() => setActiveTab("settings")}
+            className={`flex items-center gap-3 px-4 py-2 rounded-lg text-xs font-mono uppercase tracking-wider transition-all border-l-4 w-full text-left ${
+              activeTab === "settings" 
+                ? "bg-primary-container/35 text-primary border-l-primary" 
+                : "text-on-surface-variant opacity-80 hover:bg-white/5 hover:opacity-100 border-l-transparent"
+            }`}
+          >
             <Settings className="w-4 h-4" />
             Settings
-          </a>
+          </button>
           <a className="flex items-center gap-3 px-4 py-2 rounded-lg text-on-surface-variant opacity-80 hover:bg-white/5 hover:opacity-100 text-xs font-mono uppercase tracking-wider transition-all border-l-4 border-transparent" href="#">
             <HelpCircle className="w-4 h-4" />
             Help
@@ -228,7 +348,7 @@ export default function DashboardScreen({ user, onLogout }) {
             </div>
           </div>
 
-          {/* Bento Grid */}
+          {/* Bento Grid & Conditional Tab Views */}
           {isLoading ? (
             <div className="flex-grow flex items-center justify-center py-20">
               <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-primary"></div>
@@ -245,96 +365,246 @@ export default function DashboardScreen({ user, onLogout }) {
                 Retry
               </button>
             </div>
-          ) : approvals.length === 0 ? (
-            <div className="flex-grow flex flex-col items-center justify-center py-20 text-on-surface-variant border border-dashed border-white/10 rounded-2xl bg-white/5">
-              <CheckCircle2 className="w-16 h-16 text-secondary mb-4 animate-pulse" />
-              <h3 className="text-xl font-bold text-on-surface mb-1">All Caught Up!</h3>
-              <p className="text-sm">There are no pending actions requiring approvals.</p>
+          ) : (activeTab === "approvals" || activeTab === "history") ? (
+            approvals.length === 0 ? (
+              <div className="flex-grow flex flex-col items-center justify-center py-20 text-on-surface-variant border border-dashed border-white/10 rounded-2xl bg-white/5">
+                <CheckCircle2 className="w-16 h-16 text-secondary mb-4 animate-pulse" />
+                <h3 className="text-xl font-bold text-on-surface mb-1">All Caught Up!</h3>
+                <p className="text-sm">There are no pending actions requiring approvals.</p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6 pb-6">
+                {approvals.map((approval) => (
+                  <article 
+                    key={approval.id} 
+                    className="bg-white/5 border border-white/10 rounded-2xl p-6 flex flex-col gap-4 shadow-lg hover:shadow-2xl hover:-translate-y-0.5 transition-all duration-300 relative group overflow-hidden text-left"
+                  >
+                    <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                    
+                    {/* Card Top Row */}
+                    <div className="flex justify-between items-start z-10">
+                      <div className="flex items-center gap-3">
+                        <img 
+                          alt="Submitter Avatar" 
+                          className="w-12 h-12 rounded-full border-2 border-white/20 object-cover" 
+                          src="https://lh3.googleusercontent.com/aida-public/AB6AXuD8hVNY3CopT2hyMAEbb9_XZxJctq3ihGYzCkAH3F30MtIbmfaM2UYD-pGYwcKcIYV7VNAiQxoyJallfdqFu8FLCmQ_GVqhKid9r9cfFtDvF4BDRTZogZV53cr9WtQD01CkikS-VBA5NbAZbUpeEfDqz71rPEpk2ZuzFKy1HprHalj6FO9SvuAS8aPHI-Oq_y8U9Ea67uRQV7j2TqxP3tmat76eG_NT0ndgfSi7KPtJcHYbAzIO0yqCDiQQ-eq0m9DIM8cKDDCCVk0W"
+                        />
+                        <div>
+                          <h3 className="font-bold text-on-surface text-[15px] leading-tight">{approval.submitted_by.split(" (")[0]}</h3>
+                          <span className="text-[10px] font-mono text-on-surface-variant block mt-0.5">
+                            {approval.details["Employee ID"]} • {approval.submitted_by.split(" (")[1]?.replace(")", "") || "Staff"}
+                          </span>
+                        </div>
+                      </div>
+                      <span className="bg-secondary-container/20 text-secondary border border-secondary/30 px-2 py-0.5 rounded-md text-[9px] font-mono uppercase tracking-wider">
+                        High Priority
+                      </span>
+                    </div>
+  
+                    {/* Card Middle Row */}
+                    <div className="bg-black/25 rounded-xl p-4 border border-white/10 z-10 flex flex-col gap-1.5">
+                      <div className="flex items-center gap-2 text-primary">
+                        <Cpu className="w-4.5 h-4.5" />
+                        <span className="text-xs font-bold font-mono uppercase tracking-wider">{approval.tool_name}</span>
+                      </div>
+                      <div className="text-[13px] text-on-surface-variant font-mono mt-1 leading-relaxed">
+                        {approval.details["Action Required"] || "System Provisioning"}
+                      </div>
+                    </div>
+  
+                    {/* Card Details */}
+                    <div className="z-10 flex-grow text-xs text-on-surface-variant leading-relaxed">
+                      <p className="line-clamp-3"><span className="text-primary font-mono block mb-1">Details:</span> {approval.details["Requested Access"]}</p>
+                    </div>
+  
+                    {/* Actions */}
+                    <div className="flex gap-3 z-10 pt-3 border-t border-white/10 mt-auto">
+                      {activeTab === "history" ? (
+                        <div className="w-full flex items-center justify-center py-2 px-4 rounded-lg bg-black/25 border border-white/5 text-xs font-semibold">
+                          {approval.status === "approved" ? (
+                            <span className="text-green-400 flex items-center gap-1.5">
+                              <CheckCircle2 className="w-4 h-4" /> Approved
+                            </span>
+                          ) : (
+                            <span className="text-red-400 flex items-center gap-1.5">
+                              <XCircle className="w-4 h-4" /> Rejected
+                            </span>
+                          )}
+                        </div>
+                      ) : (
+                        <>
+                          <button 
+                            onClick={() => setActiveDecision({ id: approval.id, name: approval.submitted_by.split(" (")[0], action: "reject", note: "" })}
+                            className="flex-grow flex items-center justify-center gap-1.5 bg-white/5 hover:bg-red-500/10 text-on-surface border border-white/10 hover:border-red-500/40 hover:text-red-300 py-2 rounded-lg text-xs font-semibold transition-all duration-200"
+                          >
+                            <XCircle className="w-4 h-4" />
+                            Reject
+                          </button>
+                          <button 
+                            onClick={() => setActiveDecision({ id: approval.id, name: approval.submitted_by.split(" (")[0], action: "approve", note: "" })}
+                            className="flex-grow flex items-center justify-center gap-1.5 bg-[#2563eb] text-white hover:brightness-110 py-2 rounded-lg text-xs font-semibold transition-all duration-200 hover:shadow-[0_0_12px_rgba(37,99,235,0.4)]"
+                          >
+                            <CheckCircle2 className="w-4 h-4" />
+                            Approve
+                          </button>
+                        </>
+                      )}
+                    </div>
+                  </article>
+                ))}
+              </div>
+            )
+          ) : activeTab === "employees" ? (
+            <div className="glass-panel rounded-2xl p-6 border border-white/10 text-left">
+              <h2 className="text-xl font-bold text-white mb-4">Employee Directory</h2>
+              <div className="overflow-x-auto">
+                <table className="w-full text-left text-sm text-on-surface-variant">
+                  <thead>
+                    <tr className="border-b border-white/10 text-xs font-mono uppercase tracking-wider text-primary">
+                      <th className="py-3 px-4">Name</th>
+                      <th className="py-3 px-4">Email</th>
+                      <th className="py-3 px-4">Department</th>
+                      <th className="py-3 px-4">Role</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {employees.map(emp => (
+                      <tr key={emp.id} className="border-b border-white/5 hover:bg-white/5 transition-colors">
+                        <td className="py-3 px-4 text-white font-semibold">{emp.name}</td>
+                        <td className="py-3 px-4 font-mono">{emp.email}</td>
+                        <td className="py-3 px-4 capitalize">{emp.department}</td>
+                        <td className="py-3 px-4 capitalize">
+                          <span className={`px-2 py-0.5 rounded text-[10px] font-mono font-bold ${emp.role === "hr" ? "bg-secondary-container/20 text-secondary border border-secondary/30" : "bg-primary/20 text-primary border border-primary/20"}`}>
+                            {emp.role}
+                          </span>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          ) : activeTab === "company" ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-left">
+              <div className="glass-panel rounded-2xl p-6 border border-white/10 flex flex-col gap-3">
+                <h2 className="text-lg font-bold text-primary flex items-center gap-2"><Building className="w-5 h-5"/> Workspace Core Info</h2>
+                <div className="flex flex-col gap-2 mt-2">
+                  <div>
+                    <span className="text-[10px] font-mono uppercase tracking-wider text-on-surface-variant">Core Working Hours</span>
+                    <p className="text-sm font-semibold text-white">{settings.core_hours}</p>
+                  </div>
+                  <div>
+                    <span className="text-[10px] font-mono uppercase tracking-wider text-on-surface-variant">Primary HR Support Email</span>
+                    <p className="text-sm font-semibold text-white">{settings.hr_email} ({settings.hr_contact})</p>
+                  </div>
+                </div>
+              </div>
+              <div className="glass-panel rounded-2xl p-6 border border-white/10 flex flex-col gap-3">
+                <h2 className="text-lg font-bold text-primary flex items-center gap-2"><FileText className="w-5 h-5"/> Required Onboarding Docs</h2>
+                <p className="text-xs text-on-surface-variant leading-relaxed">Employees must submit the following documents to complete their file:</p>
+                <ul className="list-disc list-inside text-sm text-white mt-2 space-y-1.5 font-semibold">
+                  {settings.documents_required.split(", ").map(doc => <li key={doc}>{doc}</li>)}
+                </ul>
+              </div>
             </div>
           ) : (
-            <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6 pb-6">
-              {approvals.map((approval) => (
-                <article 
-                  key={approval.id} 
-                  className="bg-white/5 border border-white/10 rounded-2xl p-6 flex flex-col gap-4 shadow-lg hover:shadow-2xl hover:-translate-y-0.5 transition-all duration-300 relative group overflow-hidden text-left"
-                >
-                  <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                  
-                  {/* Card Top Row */}
-                  <div className="flex justify-between items-start z-10">
-                    <div className="flex items-center gap-3">
-                      <img 
-                        alt="Submitter Avatar" 
-                        className="w-12 h-12 rounded-full border-2 border-white/20 object-cover" 
-                        src="https://lh3.googleusercontent.com/aida-public/AB6AXuD8hVNY3CopT2hyMAEbb9_XZxJctq3ihGYzCkAH3F30MtIbmfaM2UYD-pGYwcKcIYV7VNAiQxoyJallfdqFu8FLCmQ_GVqhKid9r9cfFtDvF4BDRTZogZV53cr9WtQD01CkikS-VBA5NbAZbUpeEfDqz71rPEpk2ZuzFKy1HprHalj6FO9SvuAS8aPHI-Oq_y8U9Ea67uRQV7j2TqxP3tmat76eG_NT0ndgfSi7KPtJcHYbAzIO0yqCDiQQ-eq0m9DIM8cKDDCCVk0W"
-                      />
-                      <div>
-                        <h3 className="font-bold text-on-surface text-[15px] leading-tight">{approval.submitted_by.split(" (")[0]}</h3>
-                        <span className="text-[10px] font-mono text-on-surface-variant block mt-0.5">
-                          {approval.details["Employee ID"]} • {approval.submitted_by.split(" (")[1]?.replace(")", "") || "Staff"}
-                        </span>
-                      </div>
-                    </div>
-                    <span className="bg-secondary-container/20 text-secondary border border-secondary/30 px-2 py-0.5 rounded-md text-[9px] font-mono uppercase tracking-wider">
-                      High Priority
-                    </span>
-                  </div>
-
-                  {/* Card Middle Row */}
-                  <div className="bg-black/25 rounded-xl p-4 border border-white/10 z-10 flex flex-col gap-1.5">
-                    <div className="flex items-center gap-2 text-primary">
-                      <Cpu className="w-4.5 h-4.5" />
-                      <span className="text-xs font-bold font-mono uppercase tracking-wider">{approval.tool_name}</span>
-                    </div>
-                    <div className="text-[13px] text-on-surface-variant font-mono mt-1 leading-relaxed">
-                      {approval.details["Action Required"] || "System Provisioning"}
-                    </div>
-                  </div>
-
-                  {/* Card Details (requested access query) */}
-                  <div className="z-10 flex-grow text-xs text-on-surface-variant leading-relaxed">
-                    <p className="line-clamp-3"><span className="text-primary font-mono block mb-1">Details:</span> {approval.details["Requested Access"]}</p>
-                  </div>
-
-                  {/* Actions */}
-                  <div className="flex gap-3 z-10 pt-3 border-t border-white/10 mt-auto">
-                    {activeTab === "history" ? (
-                      <div className="w-full flex items-center justify-center py-2 px-4 rounded-lg bg-black/25 border border-white/5 text-xs font-semibold">
-                        {approval.status === "approved" ? (
-                          <span className="text-green-400 flex items-center gap-1.5">
-                            <CheckCircle2 className="w-4 h-4" /> Approved
-                          </span>
-                        ) : (
-                          <span className="text-red-400 flex items-center gap-1.5">
-                            <XCircle className="w-4 h-4" /> Rejected
-                          </span>
-                        )}
-                      </div>
-                    ) : (
-                      <>
-                        <button 
-                          onClick={() => setActiveDecision({ id: approval.id, name: approval.submitted_by.split(" (")[0], action: "reject", note: "" })}
-                          className="flex-grow flex items-center justify-center gap-1.5 bg-white/5 hover:bg-red-500/10 text-on-surface border border-white/10 hover:border-red-500/40 hover:text-red-300 py-2 rounded-lg text-xs font-semibold transition-all duration-200"
-                        >
-                          <XCircle className="w-4 h-4" />
-                          Reject
-                        </button>
-                        <button 
-                          onClick={() => setActiveDecision({ id: approval.id, name: approval.submitted_by.split(" (")[0], action: "approve", note: "" })}
-                          className="flex-grow flex items-center justify-center gap-1.5 bg-[#2563eb] text-white hover:brightness-110 py-2 rounded-lg text-xs font-semibold transition-all duration-200 hover:shadow-[0_0_12px_rgba(37,99,235,0.4)]"
-                        >
-                          <CheckCircle2 className="w-4 h-4" />
-                          Approve
-                        </button>
-                      </>
-                    )}
-                  </div>
-                </article>
-              ))}
-            </div>
+            <form onSubmit={saveSettings} className="glass-panel rounded-2xl p-6 border border-white/10 text-left max-w-xl flex flex-col gap-4">
+              <h2 className="text-lg font-bold text-primary flex items-center gap-2"><Settings className="w-5 h-5"/> Update Policy Settings</h2>
+              <div className="flex flex-col gap-1.5">
+                <label className="text-[10px] font-mono uppercase tracking-wider text-on-surface-variant">Core Working Hours</label>
+                <input type="text" value={settings.core_hours} onChange={e => setSettings(prev => ({ ...prev, core_hours: e.target.value }))} className="w-full bg-black/20 border border-white/25 rounded-xl py-3 px-4 text-white focus:border-primary focus:outline-none"/>
+              </div>
+              <div className="flex flex-col gap-1.5">
+                <label className="text-[10px] font-mono uppercase tracking-wider text-on-surface-variant">HR Support Contact Name</label>
+                <input type="text" value={settings.hr_contact} onChange={e => setSettings(prev => ({ ...prev, hr_contact: e.target.value }))} className="w-full bg-black/20 border border-white/25 rounded-xl py-3 px-4 text-white focus:border-primary focus:outline-none"/>
+              </div>
+              <div className="flex flex-col gap-1.5">
+                <label className="text-[10px] font-mono uppercase tracking-wider text-on-surface-variant">HR Support Email</label>
+                <input type="email" value={settings.hr_email} onChange={e => setSettings(prev => ({ ...prev, hr_email: e.target.value }))} className="w-full bg-black/20 border border-white/25 rounded-xl py-3 px-4 text-white focus:border-primary focus:outline-none"/>
+              </div>
+              <div className="flex flex-col gap-1.5">
+                <label className="text-[10px] font-mono uppercase tracking-wider text-on-surface-variant">Required Onboarding Docs (Comma separated)</label>
+                <input type="text" value={settings.documents_required} onChange={e => setSettings(prev => ({ ...prev, documents_required: e.target.value }))} className="w-full bg-black/20 border border-white/25 rounded-xl py-3 px-4 text-white focus:border-primary focus:outline-none"/>
+              </div>
+              <button type="submit" className="mt-2 bg-primary hover:brightness-110 text-on-primary font-bold py-3 rounded-xl transition-all shadow-[0_0_15px_rgba(41,161,149,0.3)]">Save Settings</button>
+            </form>
           )}
         </div>
       </main>
+ 
+      {/* New Request Modal */}
+      {showNewRequest && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-fade-in">
+          <form onSubmit={createCustomRequest} className="w-full max-w-md bg-[#0a182c] border border-white/10 rounded-2xl p-6 shadow-2xl flex flex-col gap-4">
+            <div>
+              <h3 className="font-bold text-lg text-on-surface">Issue New Ticket / Task</h3>
+              <p className="text-xs text-on-surface-variant mt-1 leading-relaxed text-left">
+                Select an employee and request access or allocate an onboarding task:
+              </p>
+            </div>
+            
+            <div className="flex flex-col gap-1.5 text-left">
+              <label className="text-[10px] font-mono uppercase tracking-wider text-on-surface-variant">Select Employee</label>
+              <select 
+                value={newRequestForm.employee_id} 
+                onChange={e => setNewRequestForm(prev => ({ ...prev, employee_id: e.target.value }))}
+                required
+                className="w-full bg-black/30 border border-white/15 rounded-xl p-3 text-sm text-white focus:outline-none focus:border-primary"
+              >
+                <option value="" disabled className="text-black">Choose Employee...</option>
+                {employees.map(emp => emp.role === "employee" && (
+                  <option key={emp.id} value={emp.id} className="text-black">{emp.name} ({emp.department})</option>
+                ))}
+              </select>
+            </div>
+
+            <div className="flex flex-col gap-1.5 text-left">
+              <label className="text-[10px] font-mono uppercase tracking-wider text-on-surface-variant">Request Type</label>
+              <select 
+                value={newRequestForm.action_type} 
+                onChange={e => setNewRequestForm(prev => ({ ...prev, action_type: e.target.value }))}
+                required
+                className="w-full bg-black/30 border border-white/15 rounded-xl p-3 text-sm text-white focus:outline-none focus:border-primary"
+              >
+                <option value="provisioning" className="text-black">IT Provisioning</option>
+                <option value="leave" className="text-black">Leave Approval</option>
+                <option value="documentation" className="text-black">Document Verification</option>
+              </select>
+            </div>
+
+            <div className="flex flex-col gap-1.5 text-left">
+              <label className="text-[10px] font-mono uppercase tracking-wider text-on-surface-variant">Request Details</label>
+              <textarea
+                value={newRequestForm.req_details}
+                onChange={e => setNewRequestForm(prev => ({ ...prev, req_details: e.target.value }))}
+                placeholder="e.g., Slack / GitHub access, 3-day sick leave"
+                required
+                rows={3}
+                className="w-full bg-black/30 border border-white/10 rounded-xl p-3 text-sm text-white placeholder-on-surface-variant/40 resize-none focus:outline-none focus:border-primary transition-all"
+              />
+            </div>
+            
+            <div className="flex gap-3 justify-end mt-2">
+              <button
+                type="button"
+                onClick={() => {
+                  setShowNewRequest(false);
+                  setNewRequestForm({ employee_id: "", action_type: "provisioning", req_details: "" });
+                }}
+                className="px-4 py-2 rounded-lg text-xs font-semibold bg-white/5 border border-white/10 hover:bg-white/10 text-on-surface transition-all"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                className="px-4 py-2 rounded-lg text-xs font-semibold text-white bg-primary hover:brightness-110 shadow-lg transition-all"
+              >
+                Create Request
+              </button>
+            </div>
+          </form>
+        </div>
+      )}
 
       {/* Decision Confirmation Modal */}
       {activeDecision && (

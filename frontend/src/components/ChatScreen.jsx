@@ -72,6 +72,113 @@ const LeaveRequestWidget = ({ onSubmit, disabled }) => {
   );
 };
 
+const ITProvisioningWidget = ({ onSubmit, disabled }) => {
+  const [selectedTools, setSelectedTools] = useState([]);
+
+  const toolsList = ["Slack", "GitHub", "Jira", "Figma", "AWS"];
+
+  const handleToggle = (tool) => {
+    if (selectedTools.includes(tool)) {
+      setSelectedTools(selectedTools.filter(t => t !== tool));
+    } else {
+      setSelectedTools([...selectedTools, tool]);
+    }
+  };
+
+  const handleSubmit = () => {
+    if (selectedTools.length === 0) return;
+    onSubmit(`ACTION:SUBMIT_IT|tools:${selectedTools.join(", ")}`);
+  };
+
+  return (
+    <div className="bg-black/40 border border-primary/30 rounded-2xl p-5 shadow-lg w-full min-w-[300px] max-w-sm flex flex-col gap-4 animate-fade-in-up">
+      <h3 className="text-primary font-bold flex items-center gap-2 text-sm"><LifeBuoy className="w-4 h-4"/> IT Account Provisioning</h3>
+      <p className="text-xs text-on-surface-variant leading-relaxed">Select the software tools and developer environments you need access to:</p>
+      
+      <div className="flex flex-col gap-2">
+        {toolsList.map((tool) => (
+          <label key={tool} className="flex items-center gap-3 p-2 rounded-lg bg-black/20 hover:bg-white/5 border border-white/5 cursor-pointer transition-colors text-xs font-semibold">
+            <input 
+              type="checkbox" 
+              checked={selectedTools.includes(tool)} 
+              onChange={() => handleToggle(tool)}
+              disabled={disabled}
+              className="rounded border-white/25 bg-black/30 text-primary focus:ring-0 w-4 h-4"
+            />
+            <span>{tool}</span>
+          </label>
+        ))}
+      </div>
+      
+      <button 
+        onClick={handleSubmit} 
+        disabled={disabled || selectedTools.length === 0}
+        className="mt-1 w-full bg-primary hover:brightness-110 text-on-primary font-bold py-2.5 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 text-sm shadow-[0_0_15px_rgba(41,161,149,0.3)]"
+      >
+        <CheckCircle2 className="w-4 h-4"/> Request Access
+      </button>
+    </div>
+  );
+};
+
+const DocumentUploadWidget = ({ onUpload, disabled }) => {
+  const [file, setFile] = useState(null);
+  const [isUploading, setIsUploading] = useState(false);
+  const [success, setSuccess] = useState(false);
+
+  const handleUpload = () => {
+    if (!file) return;
+    setIsUploading(true);
+    setTimeout(() => {
+      setIsUploading(false);
+      setSuccess(true);
+      onUpload(`ACTION:SUBMIT_DOC|file:${file.name}`);
+    }, 2000);
+  };
+
+  return (
+    <div className="bg-black/40 border border-primary/30 rounded-2xl p-5 shadow-lg w-full min-w-[300px] max-w-sm flex flex-col gap-4 animate-fade-in-up">
+      <h3 className="text-primary font-bold flex items-center gap-2 text-sm"><FileText className="w-4 h-4"/> Document Upload Portal</h3>
+      
+      {success ? (
+        <div className="flex flex-col items-center gap-2 text-center py-4">
+          <CheckCircle2 className="w-12 h-12 text-secondary animate-bounce" />
+          <p className="text-sm font-semibold text-white">Upload Successful!</p>
+          <p className="text-[11px] text-on-surface-variant font-mono truncate w-full px-4">{file?.name}</p>
+        </div>
+      ) : (
+        <>
+          <p className="text-xs text-on-surface-variant leading-relaxed">
+            Select and upload your signed contract or government-issued ID card:
+          </p>
+          <div className="border-2 border-dashed border-white/10 rounded-xl p-4 flex flex-col items-center justify-center gap-2 bg-black/25">
+            <input 
+              type="file" 
+              id="file-upload" 
+              className="hidden" 
+              disabled={disabled || isUploading}
+              onChange={e => setFile(e.target.files[0])}
+            />
+            <label htmlFor="file-upload" className="cursor-pointer bg-white/5 hover:bg-white/10 border border-white/10 px-4 py-2 rounded-lg text-xs font-semibold transition-all">
+              {file ? "Change File" : "Choose File"}
+            </label>
+            {file && <p className="text-xs text-secondary font-mono mt-1 text-center truncate w-full px-4">{file.name}</p>}
+          </div>
+          
+          <button 
+            onClick={handleUpload} 
+            disabled={disabled || !file || isUploading}
+            className="mt-1 w-full bg-primary hover:brightness-110 text-on-primary font-bold py-2.5 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 text-sm shadow-[0_0_15px_rgba(41,161,149,0.3)]"
+          >
+            {isUploading ? "Uploading..." : "Upload Document"}
+          </button>
+        </>
+      )}
+    </div>
+  );
+};
+
+
 export default function ChatScreen({ user, onLogout }) {
   const [messages, setMessages] = useState([
     { sender: "knowledge_rag", content: "Hello! I'm OnboardBot, your virtual HR assistant. How can I help you settle in today?" }
@@ -80,6 +187,22 @@ export default function ChatScreen({ user, onLogout }) {
   const [isLoading, setIsLoading] = useState(false);
   const [pendingApprovalId, setPendingApprovalId] = useState(null);
   const [approvalStatus, setApprovalStatus] = useState(null); // 'pending', 'approved', 'rejected'
+  
+  // Stateful Onboarding Progress Tracker
+  const [onboardingTasks, setOnboardingTasks] = useState({
+    login: true,
+    policy: false,
+    leave: false,
+    it: false,
+    doc: false
+  });
+
+  const calculateProgress = () => {
+    const total = Object.keys(onboardingTasks).length;
+    const completed = Object.values(onboardingTasks).filter(v => v).length;
+    return Math.round((completed / total) * 100);
+  };
+
   const messagesEndRef = useRef(null);
 
   const renderFormattedMessage = (content) => {
@@ -212,6 +335,17 @@ export default function ChatScreen({ user, onLogout }) {
 
       const data = await response.json();
       
+      // Update Onboarding Progress checklist
+      if (messageText.startsWith("ACTION:SUBMIT_LEAVE|")) {
+        setOnboardingTasks(prev => ({ ...prev, leave: true }));
+      } else if (messageText.startsWith("ACTION:SUBMIT_IT|")) {
+        setOnboardingTasks(prev => ({ ...prev, it: true }));
+      } else if (messageText.startsWith("ACTION:SUBMIT_DOC|")) {
+        setOnboardingTasks(prev => ({ ...prev, doc: true }));
+      } else if (!messageText.toLowerCase().includes("request leave") && !messageText.toLowerCase().includes("it help")) {
+        setOnboardingTasks(prev => ({ ...prev, policy: true }));
+      }
+      
       if (data.status === "awaiting_approval") {
         setPendingApprovalId(data.thread_id);
         setApprovalStatus("pending");
@@ -278,6 +412,39 @@ export default function ChatScreen({ user, onLogout }) {
           </div>
         </div>
 
+        {/* Onboarding Progress Tracker */}
+        <div className="pt-6 border-b border-white/10 pb-6 text-left">
+          <div className="flex justify-between items-center mb-2">
+            <h3 className="text-[11px] font-mono tracking-widest text-secondary uppercase">Your Onboarding</h3>
+            <span className="text-xs font-bold text-secondary font-mono">{calculateProgress()}%</span>
+          </div>
+          <div className="w-full bg-black/40 h-2 rounded-full overflow-hidden mb-4 border border-white/5">
+            <div className="bg-gradient-to-r from-secondary to-primary h-full transition-all duration-500" style={{ width: `${calculateProgress()}%` }}></div>
+          </div>
+          <ul className="flex flex-col gap-2 text-xs">
+            <li className="flex items-center gap-2 text-on-surface-variant">
+              <input type="checkbox" checked={onboardingTasks.login} readOnly className="rounded border-white/20 bg-black/20 text-primary focus:ring-0 w-3.5 h-3.5"/>
+              <span className={onboardingTasks.login ? "line-through opacity-60" : ""}>Register & Join Workspace</span>
+            </li>
+            <li className="flex items-center gap-2 text-on-surface-variant">
+              <input type="checkbox" checked={onboardingTasks.policy} readOnly className="rounded border-white/20 bg-black/20 text-primary focus:ring-0 w-3.5 h-3.5"/>
+              <span className={onboardingTasks.policy ? "line-through opacity-60" : ""}>Ask a Policy Question</span>
+            </li>
+            <li className="flex items-center gap-2 text-on-surface-variant">
+              <input type="checkbox" checked={onboardingTasks.leave} readOnly className="rounded border-white/20 bg-black/20 text-primary focus:ring-0 w-3.5 h-3.5"/>
+              <span className={onboardingTasks.leave ? "line-through opacity-60" : ""}>Request Leave (Interactive)</span>
+            </li>
+            <li className="flex items-center gap-2 text-on-surface-variant">
+              <input type="checkbox" checked={onboardingTasks.it} readOnly className="rounded border-white/20 bg-black/20 text-primary focus:ring-0 w-3.5 h-3.5"/>
+              <span className={onboardingTasks.it ? "line-through opacity-60" : ""}>Provision Software Accounts</span>
+            </li>
+            <li className="flex items-center gap-2 text-on-surface-variant">
+              <input type="checkbox" checked={onboardingTasks.doc} readOnly className="rounded border-white/20 bg-black/20 text-primary focus:ring-0 w-3.5 h-3.5"/>
+              <span className={onboardingTasks.doc ? "line-through opacity-60" : ""}>Upload Onboarding Documents</span>
+            </li>
+          </ul>
+        </div>
+
         {/* Quick Actions */}
         <div className="pt-6 flex-1 text-left">
           <h3 className="text-[11px] font-mono tracking-widest text-tertiary mb-4 uppercase">Quick Actions</h3>
@@ -299,7 +466,7 @@ export default function ChatScreen({ user, onLogout }) {
               <span className="text-sm font-semibold">IT Help</span>
             </button>
             <button 
-              onClick={() => sendMessage("What onboarding documents do I need to submit?")}
+              onClick={() => setMessages(prev => [...prev, { sender: "knowledge_rag", content: "WIDGET:DOCUMENT_UPLOAD" }])}
               disabled={isLoading || !!pendingApprovalId}
               className="flex items-center gap-3 p-3 rounded-lg text-on-surface hover:bg-white/5 transition-all duration-200 group w-full text-left disabled:opacity-50 disabled:pointer-events-none"
             >
@@ -368,7 +535,7 @@ export default function ChatScreen({ user, onLogout }) {
               {msg.sender === "user" ? (
                 <div className="max-w-[75%] md:max-w-[60%] flex flex-col items-end gap-1 animate-fade-in-up">
                   <div className="px-5 py-3 rounded-2xl rounded-tr-sm bg-gradient-to-br from-[#1c2e5e] to-[#334576] border border-primary/20 shadow-lg text-white backdrop-blur-md text-sm md:text-[15px] leading-relaxed text-left">
-                    {msg.content.startsWith("ACTION:SUBMIT_LEAVE|") ? (
+                    {msg.content.startsWith("ACTION:SUBMIT_LEAVE|") || msg.content.startsWith("ACTION:SUBMIT_IT|") || msg.content.startsWith("ACTION:SUBMIT_DOC|") ? (
                       <span className="italic opacity-70">Form Submitted</span>
                     ) : (
                       renderFormattedMessage(msg.content)
@@ -386,9 +553,36 @@ export default function ChatScreen({ user, onLogout }) {
                         onSubmit={sendMessage} 
                         disabled={isLoading || !!pendingApprovalId || i !== messages.length - 1} 
                       />
+                    ) : msg.content === "WIDGET:IT_PROVISION_FORM" ? (
+                      <ITProvisioningWidget 
+                        onSubmit={sendMessage} 
+                        disabled={isLoading || !!pendingApprovalId || i !== messages.length - 1} 
+                      />
+                    ) : msg.content === "WIDGET:DOCUMENT_UPLOAD" ? (
+                      <DocumentUploadWidget 
+                        onUpload={sendMessage} 
+                        disabled={isLoading || !!pendingApprovalId || i !== messages.length - 1} 
+                      />
+                    ) : msg.content === "WIDGET:DOCUMENT_UPLOAD" ? (
+                      <DocumentUploadWidget 
+                        onUpload={sendMessage} 
+                        disabled={isLoading || !!pendingApprovalId || i !== messages.length - 1} 
+                      />
                     ) : msg.content.startsWith("ACTION:SUBMIT_LEAVE|") ? (
                       <div className="px-5 py-3 rounded-2xl rounded-tl-sm glass-panel text-white/50 shadow-lg text-sm italic md:text-[15px] leading-relaxed text-left">
                         [Leave Request Form Submitted]
+                      </div>
+                    ) : msg.content.startsWith("ACTION:SUBMIT_IT|") ? (
+                      <div className="px-5 py-3 rounded-2xl rounded-tl-sm glass-panel text-white/50 shadow-lg text-sm italic md:text-[15px] leading-relaxed text-left">
+                        [IT Provisioning Form Submitted]
+                      </div>
+                    ) : msg.content.startsWith("ACTION:SUBMIT_DOC|") ? (
+                      <div className="px-5 py-3 rounded-2xl rounded-tl-sm glass-panel text-white/50 shadow-lg text-sm italic md:text-[15px] leading-relaxed text-left">
+                        [Document Upload Form Submitted]
+                      </div>
+                    ) : msg.content.startsWith("ACTION:SUBMIT_DOC|") ? (
+                      <div className="px-5 py-3 rounded-2xl rounded-tl-sm glass-panel text-white/50 shadow-lg text-sm italic md:text-[15px] leading-relaxed text-left">
+                        [Document Upload Form Submitted]
                       </div>
                     ) : (
                       <div className="px-5 py-3 rounded-2xl rounded-tl-sm glass-panel text-white shadow-lg text-sm md:text-[15px] leading-relaxed text-left">
