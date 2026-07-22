@@ -149,3 +149,137 @@
 .animate-spin-slow {
     animation: spin 3s linear infinite;
 }
+
+/* ===== Premium Chat Input Bar ===== */
+
+/* Rotating gradient border animation */
+@keyframes borderRotate {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+.input-bar-wrap {
+    position: relative;
+    border-radius: 1.25rem;
+    padding: 2px;
+    background: linear-gradient(
+        135deg,
+        rgba(56, 189, 248, 0.15),
+        rgba(129, 140, 248, 0.15),
+        rgba(16, 185, 129, 0.15),
+        rgba(56, 189, 248, 0.15)
+    );
+    background-size: 300% 300%;
+    animation: borderRotate 6s linear infinite;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.input-bar-wrap:focus-within {
+    background: linear-gradient(
+        135deg,
+        rgba(56, 189, 248, 0.5),
+        rgba(99, 102, 241, 0.45),
+        rgba(16, 185, 129, 0.4),
+        rgba(244, 114, 182, 0.35),
+        rgba(56, 189, 248, 0.5)
+    );
+    background-size: 300% 300%;
+    animation: borderRotate 3s linear infinite;
+    box-shadow:
+        0 0 24px rgba(56, 189, 248, 0.15),
+        0 0 48px rgba(129, 140, 248, 0.08);
+}
+
+.input-bar-wrap.light-mode {
+    background: linear-gradient(
+        135deg,
+        rgba(14, 165, 233, 0.12),
+        rgba(99, 102, 241, 0.12),
+        rgba(16, 185, 129, 0.12),
+        rgba(14, 165, 233, 0.12)
+    );
+    background-size: 300% 300%;
+    animation: borderRotate 6s linear infinite;
+}
+
+.input-bar-wrap.light-mode:focus-within {
+    background: linear-gradient(
+        135deg,
+        rgba(14, 165, 233, 0.4),
+        rgba(99, 102, 241, 0.35),
+        rgba(16, 185, 129, 0.3),
+        rgba(244, 114, 182, 0.25),
+        rgba(14, 165, 233, 0.4)
+    );
+    background-size: 300% 300%;
+    animation: borderRotate 3s linear infinite;
+    box-shadow:
+        0 0 30px rgba(14, 165, 233, 0.12),
+        0 0 60px rgba(99, 102, 241, 0.06);
+}
+
+/* Inner glass container */
+.input-bar-inner {
+    border-radius: calc(1.25rem - 2px);
+    position: relative;
+    overflow: hidden;
+}
+
+.input-bar-inner::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 200%;
+    height: 100%;
+    background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(255, 255, 255, 0.03),
+        transparent
+    );
+    animation: shimmerSlide 4s ease-in-out infinite;
+    pointer-events: none;
+    z-index: 1;
+}
+
+.input-bar-inner.light-inner::before {
+    background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(255, 255, 255, 0.5),
+        transparent
+    );
+}
+
+@keyframes shimmerSlide {
+    0% { left: -100%; }
+    100% { left: 100%; }
+}
+
+/* Typing indicator dots */
+@keyframes typingDot {
+    0%, 60%, 100% { transform: translateY(0); opacity: 0.4; }
+    30% { transform: translateY(-4px); opacity: 1; }
+}
+.typing-dot {
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    display: inline-block;
+    animation: typingDot 1.4s infinite ease-in-out;
+}
+.typing-dot:nth-child(1) { animation-delay: 0s; }
+.typing-dot:nth-child(2) { animation-delay: 0.2s; }
+.typing-dot:nth-child(3) { animation-delay: 0.4s; }
+
+/* Send button pulse on active */
+@keyframes sendPulse {
+    0% { box-shadow: 0 0 0 0 rgba(14, 165, 233, 0.5); }
+    70% { box-shadow: 0 0 0 10px rgba(14, 165, 233, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(14, 165, 233, 0); }
+}
+.send-btn-ready {
+    animation: sendPulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}

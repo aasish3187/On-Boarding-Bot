@@ -24,7 +24,11 @@ import {
   Moon,
   Trash2,
   Download,
-  Headphones
+  Headphones,
+  Paperclip,
+  Command,
+  ArrowUp,
+  Zap
 } from "lucide-react";
 
 const LeaveRequestWidget = ({ onSubmit, disabled, isDarkMode }) => {
@@ -443,6 +447,25 @@ export default function ChatScreen({ user, onLogout }) {
   const [language, setLanguage] = useState("en");
   const [isDarkMode, setIsDarkMode] = useState(true);
   const [showMenu, setShowMenu] = useState(false);
+  const [isFocused, setIsFocused] = useState(false);
+  const [placeholderIndex, setPlaceholderIndex] = useState(0);
+
+  const placeholderHints = [
+    "Ask about company policies...",
+    "Request leave or time off...",
+    "Set up your IT accounts...",
+    "Upload onboarding documents...",
+    "Ask about team structure...",
+    "Check your benefits package...",
+  ];
+
+  useEffect(() => {
+    if (isFocused) return;
+    const interval = setInterval(() => {
+      setPlaceholderIndex(prev => (prev + 1) % placeholderHints.length);
+    }, 3000);
+    return () => clearInterval(interval);
+  }, [isFocused]);
 
   const handleClearChat = () => {
     setMessages([
@@ -1215,55 +1238,158 @@ export default function ChatScreen({ user, onLogout }) {
           <div ref={messagesEndRef} />
         </div>
 
-        {/* Input Area */}
-        <div className={`p-6 pt-4 shrink-0 transition-colors duration-500 ${
-          isDarkMode ? "bg-gradient-to-t from-surface via-surface/90 to-transparent" : "bg-gradient-to-t from-white via-white/95 to-transparent"
+        {/* Premium Input Area */}
+        <div className={`px-6 pb-5 pt-3 shrink-0 transition-colors duration-500 ${
+          isDarkMode ? "bg-gradient-to-t from-[#070b14] via-[#070b14]/80 to-transparent" : "bg-gradient-to-t from-slate-50 via-white/90 to-transparent"
         }`}>
-          <form onSubmit={handleSend} className="relative flex items-end w-full max-w-4xl mx-auto">
-            <textarea
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter" && !e.shiftKey) {
-                  e.preventDefault();
-                  handleSend(e);
-                }
-              }}
-              disabled={isLoading || !!pendingApprovalId}
-              placeholder={pendingApprovalId ? "Waiting for HR Action..." : "Type a message..."}
-              rows={1}
-              style={{ minHeight: "52px" }}
-              className={`w-full border rounded-2xl py-3 pl-4 pr-24 resize-none max-h-32 focus:outline-none transition-all duration-300 ${
-                isDarkMode 
-                  ? "bg-black/40 border-white/10 text-white placeholder:text-slate-400 focus:ring-sky-500 focus:bg-black/60" 
-                  : "bg-white border-slate-300 text-slate-900 placeholder:text-slate-500 font-semibold shadow-md focus:ring-sky-600 focus:border-sky-500"
-              }`}
-            />
-            <button 
-              type="button"
-              onClick={handleVoiceInput}
-              disabled={isLoading || !!pendingApprovalId}
-              title="Voice Input (Speech-to-Text)"
-              className={`absolute right-14 bottom-2.5 w-9 h-9 rounded-xl border transition-all flex items-center justify-center ${
-                isListening 
-                  ? "bg-red-500/20 text-red-500 border-red-500/40 animate-pulse" 
-                  : isDarkMode
-                  ? "bg-white/5 text-slate-300 border-white/10 hover:bg-white/10 hover:text-white"
-                  : "bg-slate-100 text-slate-700 border-slate-300 hover:bg-slate-200 shadow-sm"
-              }`}
-            >
-              <Mic className="w-4 h-4" />
-            </button>
-            <button 
-              type="submit"
-              disabled={isLoading || !!pendingApprovalId || !input.trim()}
-              className="absolute right-2.5 bottom-2.5 w-9 h-9 rounded-xl bg-sky-600 text-white hover:bg-sky-500 transition-colors flex items-center justify-center shadow-md active:scale-95 group disabled:opacity-40 disabled:pointer-events-none"
-            >
-              <Send className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
-            </button>
-          </form>
-          <div className="text-center mt-2">
-            <span className="text-[10px] text-on-surface-variant/60">OnboardBot may produce inaccurate information.</span>
+          <div className="w-full max-w-4xl mx-auto">
+
+            {/* Quick Suggestion Chips - visible when not focused and no text */}
+            {!isFocused && !input.trim() && !pendingApprovalId && (
+              <div className="flex items-center gap-2 mb-3 overflow-x-auto pb-1 animate-fade-in-up">
+                {[
+                  { label: "Leave Request", icon: Calendar },
+                  { label: "IT Setup", icon: LifeBuoy },
+                  { label: "Upload Docs", icon: FileText },
+                  { label: "Company Policy", icon: ShieldCheck },
+                ].map((chip) => (
+                  <button
+                    key={chip.label}
+                    type="button"
+                    onClick={() => { setInput(chip.label === "Leave Request" ? "I want to request leave" : chip.label === "IT Setup" ? "Help me set up my IT accounts" : chip.label === "Upload Docs" ? "I need to upload my documents" : "Tell me about company policies"); }}
+                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-bold border whitespace-nowrap transition-all duration-200 hover:scale-105 active:scale-95 ${
+                      isDarkMode
+                        ? "bg-white/5 border-white/10 text-slate-300 hover:bg-white/10 hover:text-white hover:border-sky-500/30"
+                        : "bg-white border-slate-200 text-slate-600 hover:bg-sky-50 hover:text-sky-700 hover:border-sky-300 shadow-sm"
+                    }`}
+                  >
+                    <chip.icon className="w-3 h-3" />
+                    {chip.label}
+                  </button>
+                ))}
+              </div>
+            )}
+
+            {/* Animated Gradient Border Wrapper */}
+            <div className={`input-bar-wrap ${!isDarkMode ? "light-mode" : ""}`}>
+              <form 
+                onSubmit={handleSend} 
+                className={`input-bar-inner ${!isDarkMode ? "light-inner" : ""} flex items-end gap-0 ${
+                  isDarkMode 
+                    ? "bg-[#0c1425]" 
+                    : "bg-white"
+                }`}
+              >
+                {/* Left Action Button - Attach */}
+                <div className="flex items-center pl-3 pb-3 pt-3 shrink-0">
+                  <button
+                    type="button"
+                    title="Attach File"
+                    disabled={isLoading || !!pendingApprovalId}
+                    onClick={() => {
+                      setMessages(prev => [...prev, 
+                        { sender: "knowledge_rag", content: "WIDGET:DOCUMENT_UPLOAD" }
+                      ]);
+                    }}
+                    className={`w-8 h-8 rounded-lg flex items-center justify-center transition-all duration-200 hover:scale-110 active:scale-95 disabled:opacity-30 ${
+                      isDarkMode
+                        ? "text-slate-400 hover:text-sky-400 hover:bg-white/10"
+                        : "text-slate-400 hover:text-sky-600 hover:bg-sky-50"
+                    }`}
+                  >
+                    <Paperclip className="w-[18px] h-[18px]" />
+                  </button>
+                </div>
+
+                {/* Textarea */}
+                <div className="flex-1 relative min-w-0">
+                  <textarea
+                    value={input}
+                    onChange={(e) => setInput(e.target.value)}
+                    onFocus={() => setIsFocused(true)}
+                    onBlur={() => setIsFocused(false)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" && !e.shiftKey) {
+                        e.preventDefault();
+                        handleSend(e);
+                      }
+                    }}
+                    disabled={isLoading || !!pendingApprovalId}
+                    placeholder={pendingApprovalId ? "Waiting for HR Action..." : placeholderHints[placeholderIndex]}
+                    rows={1}
+                    style={{ minHeight: "48px" }}
+                    className={`w-full py-3 px-1 resize-none max-h-32 focus:outline-none bg-transparent transition-all duration-300 text-[15px] leading-relaxed ${
+                      isDarkMode
+                        ? "text-white placeholder:text-slate-500"
+                        : "text-slate-900 placeholder:text-slate-400 font-medium"
+                    }`}
+                  />
+                </div>
+
+                {/* Right Action Group */}
+                <div className="flex items-center gap-1 pr-2 pb-2.5 pt-2.5 shrink-0">
+                  {/* Character Counter - appears while typing */}
+                  {input.trim().length > 0 && (
+                    <span className={`text-[10px] font-mono mr-1 tabular-nums transition-opacity ${
+                      input.trim().length > 400 ? "text-amber-500 font-bold" : isDarkMode ? "text-slate-500" : "text-slate-400"
+                    }`}>
+                      {input.trim().length}
+                    </span>
+                  )}
+
+                  {/* Voice Input */}
+                  <button
+                    type="button"
+                    onClick={handleVoiceInput}
+                    disabled={isLoading || !!pendingApprovalId}
+                    title="Voice Input (Speech-to-Text)"
+                    className={`w-8 h-8 rounded-lg flex items-center justify-center transition-all duration-200 hover:scale-110 active:scale-95 disabled:opacity-30 ${
+                      isListening
+                        ? "bg-red-500/20 text-red-400 animate-pulse ring-2 ring-red-500/40"
+                        : isDarkMode
+                        ? "text-slate-400 hover:text-sky-400 hover:bg-white/10"
+                        : "text-slate-400 hover:text-sky-600 hover:bg-sky-50"
+                    }`}
+                  >
+                    <Mic className="w-[18px] h-[18px]" />
+                  </button>
+
+                  {/* Divider */}
+                  <div className={`w-px h-5 mx-0.5 ${isDarkMode ? "bg-white/10" : "bg-slate-200"}`} />
+
+                  {/* Send Button */}
+                  <button
+                    type="submit"
+                    disabled={isLoading || !!pendingApprovalId || !input.trim()}
+                    className={`w-8 h-8 rounded-lg flex items-center justify-center transition-all duration-300 group disabled:opacity-25 disabled:pointer-events-none active:scale-90 ${
+                      input.trim()
+                        ? `bg-sky-600 text-white hover:bg-sky-500 shadow-lg ${!isLoading ? "send-btn-ready" : ""}`
+                        : isDarkMode
+                        ? "bg-white/5 text-slate-500"
+                        : "bg-slate-100 text-slate-400"
+                    }`}
+                  >
+                    {isLoading ? (
+                      <div className="flex items-center gap-[3px]">
+                        <span className="typing-dot bg-white" />
+                        <span className="typing-dot bg-white" />
+                        <span className="typing-dot bg-white" />
+                      </div>
+                    ) : (
+                      <ArrowUp className="w-[18px] h-[18px] group-hover:-translate-y-0.5 transition-transform" />
+                    )}
+                  </button>
+                </div>
+              </form>
+            </div>
+
+            {/* Footer Disclaimer */}
+            <div className="flex items-center justify-center gap-1.5 mt-2.5">
+              <Zap className={`w-3 h-3 ${isDarkMode ? "text-sky-500/40" : "text-sky-400/50"}`} />
+              <span className={`text-[10px] font-medium ${isDarkMode ? "text-slate-500/70" : "text-slate-400/80"}`}>
+                OnboardBot is powered by AI and may produce inaccurate information.
+              </span>
+            </div>
           </div>
         </div>
       </main>
