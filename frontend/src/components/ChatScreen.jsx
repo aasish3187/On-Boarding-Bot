@@ -607,10 +607,10 @@ export default function ChatScreen({ user, onLogout }) {
   };
 
   return (
-    <div className={`flex h-screen w-full relative z-10 p-4 gap-4 max-w-[1600px] mx-auto overflow-hidden transition-colors duration-500 ${isDarkMode ? "mesh-bg" : "bg-slate-100 text-slate-900 font-sans"}`}>
+    <div className={`flex h-screen w-full relative z-10 p-4 gap-4 max-w-[1600px] mx-auto overflow-hidden transition-colors duration-500 ${isDarkMode ? "mesh-bg" : "liquid-light-bg text-slate-900 font-sans"}`}>
       
       {/* Left Sidebar (Glass Panel) */}
-      <aside className="hidden md:flex flex-col w-[25%] max-w-[320px] glass-panel rounded-xl shadow-2xl relative overflow-hidden p-6">
+      <aside className={`hidden md:flex flex-col w-[25%] max-w-[320px] rounded-3xl shadow-2xl relative overflow-hidden p-6 transition-colors duration-500 ${isDarkMode ? "glass-panel" : "liquid-glass-panel"}`}>
         
         {/* User Profile Section */}
         <div className="flex items-center gap-4 pb-6 border-b border-white/10">
@@ -777,45 +777,63 @@ export default function ChatScreen({ user, onLogout }) {
       </aside>
 
       {/* Right Main Chat Area */}
-      <main className="flex-1 flex flex-col glass-panel rounded-xl shadow-2xl relative overflow-hidden h-full">
+      <main className={`flex-1 flex flex-col rounded-3xl shadow-2xl relative overflow-hidden h-full transition-colors duration-500 ${isDarkMode ? "glass-panel" : "liquid-glass-panel"}`}>
         
-        {/* Top Header */}
-        <header className="h-16 flex items-center justify-between px-6 border-b border-white/10 bg-black/20 shrink-0">
-          <div className="flex items-center gap-4">
-            <h1 className="font-bold text-lg text-primary tracking-tight">OnboardBot</h1>
-            <div className="flex items-center gap-2 bg-black/30 px-3 py-1 rounded-full border border-white/10">
-              <div className="w-2 h-2 rounded-full bg-secondary status-dot-pulse"></div>
-              <span className="text-[10px] font-mono text-secondary uppercase tracking-widest">Online</span>
-            </div>
+        {/* iOS Dynamic Island Top Header */}
+        <header className="h-16 flex items-center justify-between px-6 border-b border-white/10 relative z-40 shrink-0">
+          <div className="flex items-center gap-3">
+            <span className="font-bold text-lg text-primary tracking-tight font-mono">OnboardBot</span>
           </div>
-          <div className="flex items-center gap-2 relative">
-            {/* Persona Selector */}
-            <div className="hidden md:flex items-center gap-1 bg-black/30 border border-white/10 rounded-lg px-2 py-1">
-              <Sparkles className="w-3.5 h-3.5 text-primary" />
-              <select value={persona} onChange={e => setPersona(e.target.value)} className="bg-transparent text-xs text-white focus:outline-none cursor-pointer">
+
+          {/* Centered Floating Dynamic Island Capsule */}
+          <div className="dynamic-island cursor-pointer bg-slate-950/90 text-white border border-white/20 rounded-full px-5 py-2 flex items-center gap-4 shadow-2xl backdrop-blur-xl relative z-50 group hover:px-6 transition-all duration-500">
+            <div className="flex items-center gap-2">
+              <div className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse shadow-[0_0_8px_rgba(52,211,153,0.8)]"></div>
+              <span className="text-xs font-mono font-bold text-emerald-400 uppercase tracking-wider">AI ACTIVE</span>
+            </div>
+
+            <div className="h-3.5 w-px bg-white/20"></div>
+
+            {/* Live Equalizer Waves when AI is thinking */}
+            {isLoading ? (
+              <div className="flex items-center gap-1">
+                <span className="soundwave-bar"></span>
+                <span className="soundwave-bar"></span>
+                <span className="soundwave-bar"></span>
+                <span className="soundwave-bar"></span>
+              </div>
+            ) : (
+              <div className="flex items-center gap-2">
+                <Sparkles className="w-3.5 h-3.5 text-sky-400" />
+                <span className="text-xs font-mono text-white/90">{calculateProgress()}% Onboarded</span>
+              </div>
+            )}
+
+            {/* Dynamic Island Expansion Content on Hover */}
+            <div className="hidden group-hover:flex items-center gap-3 pl-2 border-l border-white/20 animate-fade-in-up">
+              <select value={persona} onChange={e => setPersona(e.target.value)} className="bg-transparent text-[11px] font-mono text-sky-300 focus:outline-none cursor-pointer">
                 <option value="professional" className="bg-slate-900 text-white">Professional HR</option>
                 <option value="tech_mentor" className="bg-slate-900 text-white">Tech Mentor</option>
                 <option value="executive" className="bg-slate-900 text-white">Executive Guide</option>
               </select>
-            </div>
 
-            {/* Language Selector */}
-            <div className="hidden sm:flex items-center gap-1 bg-black/30 border border-white/10 rounded-lg px-2 py-1">
-              <span className="text-[10px] font-mono text-secondary uppercase font-bold">LANG</span>
-              <select value={language} onChange={e => setLanguage(e.target.value)} className="bg-transparent text-xs text-white focus:outline-none cursor-pointer">
-                <option value="en" className="bg-slate-900 text-white">English (EN)</option>
-                <option value="es" className="bg-slate-900 text-white">Español (ES)</option>
-                <option value="fr" className="bg-slate-900 text-white">Français (FR)</option>
-                <option value="de" className="bg-slate-900 text-white">Deutsch (DE)</option>
+              <select value={language} onChange={e => setLanguage(e.target.value)} className="bg-transparent text-[11px] font-mono text-emerald-300 focus:outline-none cursor-pointer">
+                <option value="en" className="bg-slate-900 text-white">EN</option>
+                <option value="es" className="bg-slate-900 text-white">ES</option>
+                <option value="fr" className="bg-slate-900 text-white">FR</option>
+                <option value="de" className="bg-slate-900 text-white">DE</option>
               </select>
             </div>
+          </div>
+
+          <div className="flex items-center gap-2 relative">
             {/* Light / Dark Mode Toggle */}
             <button 
               onClick={() => setIsDarkMode(!isDarkMode)}
-              title={isDarkMode ? "Switch to Light Mode" : "Switch to Dark Mode"}
+              title={isDarkMode ? "Switch to liquidGlass Light Mode" : "Switch to Deep Obsidian Dark Mode"}
               className="p-2 rounded-full hover:bg-white/10 text-on-surface-variant transition-colors"
             >
-              {isDarkMode ? <Sun className="w-4 h-4 text-yellow-400" /> : <Moon className="w-4 h-4 text-secondary" />}
+              {isDarkMode ? <Sun className="w-4 h-4 text-yellow-400" /> : <Moon className="w-4 h-4 text-sky-500" />}
             </button>
 
             {/* Header Sign Out Button */}
@@ -845,7 +863,7 @@ export default function ChatScreen({ user, onLogout }) {
                     className="w-full px-4 py-2 text-xs text-on-surface hover:bg-white/10 flex items-center gap-2.5 transition-colors"
                   >
                     {isDarkMode ? <Sun className="w-4 h-4 text-yellow-400" /> : <Moon className="w-4 h-4 text-secondary" />}
-                    <span>{isDarkMode ? "Switch to Light Mode" : "Switch to Dark Mode"}</span>
+                    <span>{isDarkMode ? "Switch to liquidGlass Light" : "Switch to Deep Obsidian Dark"}</span>
                   </button>
 
                   <button 

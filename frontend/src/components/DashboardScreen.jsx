@@ -394,11 +394,40 @@ export default function DashboardScreen({ user, onLogout }) {
 
       {/* Right Content Area */}
       <main className="flex-grow flex flex-col glass-panel rounded-xl shadow-2xl relative overflow-hidden h-full">
-        {/* TopNavBar */}
-        <nav className="h-16 flex justify-between items-center px-6 bg-black/20 backdrop-blur-xl border-b border-white/10 shrink-0">
-          <div className="flex items-center gap-4">
-            <span className="font-bold text-lg text-primary cursor-pointer hover:text-primary transition-colors">OnboardBot Enterprise</span>
+        {/* iOS Dynamic Island Top Header for HR */}
+        <nav className="h-16 flex justify-between items-center px-6 border-b border-white/10 relative z-40 shrink-0">
+          <div className="flex items-center gap-3">
+            <span className="font-bold text-lg text-primary cursor-pointer hover:text-primary transition-colors font-mono">OnboardBot Enterprise</span>
           </div>
+
+          {/* Centered Floating Dynamic Island Capsule */}
+          <div className="dynamic-island cursor-pointer bg-slate-950/90 text-white border border-white/20 rounded-full px-5 py-2 flex items-center gap-4 shadow-2xl backdrop-blur-xl relative z-50 group hover:px-6 transition-all duration-500">
+            <div className="flex items-center gap-2">
+              <div className="w-2.5 h-2.5 rounded-full bg-sky-400 animate-pulse shadow-[0_0_8px_rgba(56,189,248,0.8)]"></div>
+              <span className="text-xs font-mono font-bold text-sky-400 uppercase tracking-wider">HR DASHBOARD</span>
+            </div>
+
+            <div className="h-3.5 w-px bg-white/20"></div>
+
+            <div className="flex items-center gap-2">
+              <ShieldCheck className="w-3.5 h-3.5 text-yellow-400" />
+              <span className="text-xs font-mono text-white/90">{approvals.length} Pending Actions</span>
+            </div>
+
+            {/* Dynamic Island Expansion Content on Hover */}
+            <div className="hidden group-hover:flex items-center gap-3 pl-2 border-l border-white/20 animate-fade-in-up">
+              <a 
+                href="http://localhost:8000/api/v1/export/audit-csv" 
+                target="_blank" 
+                rel="noreferrer"
+                className="text-[11px] font-mono font-bold text-emerald-400 hover:underline flex items-center gap-1"
+              >
+                <Download className="w-3 h-3" />
+                CSV Report
+              </a>
+            </div>
+          </div>
+
           <div className="flex items-center gap-3">
             <a 
               href="http://localhost:8000/api/v1/export/audit-csv" 
