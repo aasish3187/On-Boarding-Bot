@@ -27,7 +27,7 @@ import {
   Headphones
 } from "lucide-react";
 
-const LeaveRequestWidget = ({ onSubmit, disabled }) => {
+const LeaveRequestWidget = ({ onSubmit, disabled, isDarkMode }) => {
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
   const [reason, setReason] = useState("");
@@ -49,35 +49,57 @@ const LeaveRequestWidget = ({ onSubmit, disabled }) => {
   };
 
   return (
-    <div className="bg-black/40 border border-primary/30 rounded-2xl p-5 shadow-lg w-full min-w-[300px] max-w-sm flex flex-col gap-4 animate-fade-in-up">
-      <h3 className="text-primary font-bold flex items-center gap-2 text-sm"><Calendar className="w-4 h-4"/> Request Leave</h3>
+    <div className={`rounded-2xl p-5 shadow-lg w-full min-w-[300px] max-w-sm flex flex-col gap-4 animate-fade-in-up border ${
+      isDarkMode ? "bg-slate-900/90 border-sky-500/30 text-white" : "bg-white border-slate-300 text-slate-900 shadow-md"
+    }`}>
+      <h3 className={`font-bold flex items-center gap-2 text-sm ${isDarkMode ? "text-sky-400" : "text-sky-700"}`}>
+        <Calendar className="w-4 h-4"/> Request Leave
+      </h3>
       
       <div className="flex gap-4">
         <div className="flex-1">
-          <label className="text-[11px] text-on-surface-variant block mb-1">Start Date</label>
-          <input type="date" value={startDate} onChange={e => setStartDate(e.target.value)} disabled={disabled} className="w-full bg-black/30 border border-white/10 rounded-lg p-2 text-sm text-white focus:border-primary focus:outline-none"/>
+          <label className={`text-[11px] font-mono uppercase block mb-1 font-bold ${isDarkMode ? "text-slate-400" : "text-slate-700"}`}>Start Date</label>
+          <input 
+            type="date" 
+            value={startDate} 
+            onChange={e => setStartDate(e.target.value)} 
+            disabled={disabled} 
+            className={`w-full rounded-lg p-2 text-sm border focus:outline-none focus:ring-1 focus:ring-sky-500 ${
+              isDarkMode ? "bg-slate-950 border-white/20 text-white" : "bg-slate-100 border-slate-300 text-slate-900 font-semibold"
+            }`}
+          />
         </div>
         <div className="flex-1">
-          <label className="text-[11px] text-on-surface-variant block mb-1">End Date</label>
-          <input type="date" value={endDate} onChange={e => setEndDate(e.target.value)} disabled={disabled} className="w-full bg-black/30 border border-white/10 rounded-lg p-2 text-sm text-white focus:border-primary focus:outline-none"/>
+          <label className={`text-[11px] font-mono uppercase block mb-1 font-bold ${isDarkMode ? "text-slate-400" : "text-slate-700"}`}>End Date</label>
+          <input 
+            type="date" 
+            value={endDate} 
+            onChange={e => setEndDate(e.target.value)} 
+            disabled={disabled} 
+            className={`w-full rounded-lg p-2 text-sm border focus:outline-none focus:ring-1 focus:ring-sky-500 ${
+              isDarkMode ? "bg-slate-950 border-white/20 text-white" : "bg-slate-100 border-slate-300 text-slate-900 font-semibold"
+            }`}
+          />
         </div>
       </div>
       
-      {days > 0 && <p className="text-xs text-secondary font-mono">Total: {days} day(s)</p>}
+      {days > 0 && <p className="text-xs text-emerald-600 font-mono font-bold">Total Duration: {days} day(s)</p>}
       
       <div>
-        <label className="text-[11px] text-on-surface-variant block mb-1">Reason for leave</label>
+        <label className={`text-[11px] font-mono uppercase block mb-1 font-bold ${isDarkMode ? "text-slate-400" : "text-slate-700"}`}>Reason for leave</label>
         <textarea 
           value={reason} onChange={e => setReason(e.target.value)} disabled={disabled}
           placeholder="e.g. Family vacation" 
-          className="w-full bg-black/30 border border-white/10 rounded-lg p-2 text-sm text-white focus:border-primary focus:outline-none resize-none h-20"
+          className={`w-full rounded-lg p-2.5 text-sm border focus:outline-none focus:ring-1 focus:ring-sky-500 resize-none h-20 ${
+            isDarkMode ? "bg-slate-950 border-white/20 text-white placeholder:text-slate-500" : "bg-slate-100 border-slate-300 text-slate-900 placeholder:text-slate-500 font-semibold"
+          }`}
         />
       </div>
       
       <button 
         onClick={handleSubmit} 
         disabled={disabled || days <= 0 || !reason}
-        className="mt-1 w-full bg-primary hover:brightness-110 text-on-primary font-bold py-2.5 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 text-sm shadow-[0_0_15px_rgba(41,161,149,0.3)]"
+        className="mt-1 w-full bg-sky-600 hover:bg-sky-500 text-white font-bold py-2.5 rounded-xl transition-all disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2 text-sm shadow-md active:scale-95 cursor-pointer"
       >
         <CheckCircle2 className="w-4 h-4"/> Submit to HR
       </button>
@@ -85,7 +107,7 @@ const LeaveRequestWidget = ({ onSubmit, disabled }) => {
   );
 };
 
-const ITProvisioningWidget = ({ onSubmit, disabled }) => {
+const ITProvisioningWidget = ({ onSubmit, disabled, isDarkMode }) => {
   const [selectedTools, setSelectedTools] = useState([]);
 
   const toolsList = ["Slack", "GitHub", "Jira", "Figma", "AWS"];
@@ -104,19 +126,25 @@ const ITProvisioningWidget = ({ onSubmit, disabled }) => {
   };
 
   return (
-    <div className="bg-black/40 border border-primary/30 rounded-2xl p-5 shadow-lg w-full min-w-[300px] max-w-sm flex flex-col gap-4 animate-fade-in-up">
-      <h3 className="text-primary font-bold flex items-center gap-2 text-sm"><LifeBuoy className="w-4 h-4"/> IT Account Provisioning</h3>
-      <p className="text-xs text-on-surface-variant leading-relaxed">Select the software tools and developer environments you need access to:</p>
+    <div className={`rounded-2xl p-5 shadow-lg w-full min-w-[300px] max-w-sm flex flex-col gap-4 animate-fade-in-up border ${
+      isDarkMode ? "bg-slate-900/90 border-sky-500/30 text-white" : "bg-white border-slate-300 text-slate-900 shadow-md"
+    }`}>
+      <h3 className={`font-bold flex items-center gap-2 text-sm ${isDarkMode ? "text-sky-400" : "text-sky-700"}`}>
+        <LifeBuoy className="w-4 h-4"/> IT Account Provisioning
+      </h3>
+      <p className={`text-xs leading-relaxed ${isDarkMode ? "text-slate-300" : "text-slate-700 font-medium"}`}>Select the software tools and developer environments you need access to:</p>
       
       <div className="flex flex-col gap-2">
         {toolsList.map((tool) => (
-          <label key={tool} className="flex items-center gap-3 p-2 rounded-lg bg-black/20 hover:bg-white/5 border border-white/5 cursor-pointer transition-colors text-xs font-semibold">
+          <label key={tool} className={`flex items-center gap-3 p-2.5 rounded-xl border cursor-pointer transition-all text-xs font-bold ${
+            isDarkMode ? "bg-black/20 hover:bg-white/10 border-white/10 text-white" : "bg-slate-50 hover:bg-slate-100 border-slate-300 text-slate-900"
+          }`}>
             <input 
               type="checkbox" 
               checked={selectedTools.includes(tool)} 
               onChange={() => handleToggle(tool)}
               disabled={disabled}
-              className="rounded border-white/25 bg-black/30 text-primary focus:ring-0 w-4 h-4"
+              className="rounded border-slate-400 text-sky-600 focus:ring-0 w-4 h-4"
             />
             <span>{tool}</span>
           </label>
@@ -126,7 +154,7 @@ const ITProvisioningWidget = ({ onSubmit, disabled }) => {
       <button 
         onClick={handleSubmit} 
         disabled={disabled || selectedTools.length === 0}
-        className="mt-1 w-full bg-primary hover:brightness-110 text-on-primary font-bold py-2.5 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 text-sm shadow-[0_0_15px_rgba(41,161,149,0.3)]"
+        className="mt-1 w-full bg-sky-600 hover:bg-sky-500 text-white font-bold py-2.5 rounded-xl transition-all disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2 text-sm shadow-md active:scale-95 cursor-pointer"
       >
         <CheckCircle2 className="w-4 h-4"/> Request Access
       </button>
@@ -134,7 +162,7 @@ const ITProvisioningWidget = ({ onSubmit, disabled }) => {
   );
 };
 
-const DocumentUploadWidget = ({ onUpload, disabled }) => {
+const DocumentUploadWidget = ({ onUpload, disabled, isDarkMode }) => {
   const [file, setFile] = useState(null);
   const [isUploading, setIsUploading] = useState(false);
   const [success, setSuccess] = useState(false);
@@ -150,21 +178,27 @@ const DocumentUploadWidget = ({ onUpload, disabled }) => {
   };
 
   return (
-    <div className="bg-black/40 border border-primary/30 rounded-2xl p-5 shadow-lg w-full min-w-[300px] max-w-sm flex flex-col gap-4 animate-fade-in-up">
-      <h3 className="text-primary font-bold flex items-center gap-2 text-sm"><FileText className="w-4 h-4"/> Document Upload Portal</h3>
+    <div className={`rounded-2xl p-5 shadow-lg w-full min-w-[300px] max-w-sm flex flex-col gap-4 animate-fade-in-up border ${
+      isDarkMode ? "bg-slate-900/90 border-sky-500/30 text-white" : "bg-white border-slate-300 text-slate-900 shadow-md"
+    }`}>
+      <h3 className={`font-bold flex items-center gap-2 text-sm ${isDarkMode ? "text-sky-400" : "text-sky-700"}`}>
+        <FileText className="w-4 h-4"/> Document Upload Portal
+      </h3>
       
       {success ? (
         <div className="flex flex-col items-center gap-2 text-center py-4">
-          <CheckCircle2 className="w-12 h-12 text-secondary animate-bounce" />
-          <p className="text-sm font-semibold text-white">Upload Successful!</p>
-          <p className="text-[11px] text-on-surface-variant font-mono truncate w-full px-4">{file?.name}</p>
+          <CheckCircle2 className="w-12 h-12 text-emerald-500 animate-bounce" />
+          <p className={`text-sm font-bold ${isDarkMode ? "text-white" : "text-slate-900"}`}>Upload Successful!</p>
+          <p className={`text-[11px] font-mono truncate w-full px-4 ${isDarkMode ? "text-slate-400" : "text-slate-600 font-semibold"}`}>{file?.name}</p>
         </div>
       ) : (
         <>
-          <p className="text-xs text-on-surface-variant leading-relaxed">
+          <p className={`text-xs leading-relaxed ${isDarkMode ? "text-slate-300" : "text-slate-700 font-medium"}`}>
             Select and upload your signed contract or government-issued ID card:
           </p>
-          <div className="border-2 border-dashed border-white/10 rounded-xl p-4 flex flex-col items-center justify-center gap-2 bg-black/25">
+          <div className={`border-2 border-dashed rounded-xl p-4 flex flex-col items-center justify-center gap-2 ${
+            isDarkMode ? "border-white/20 bg-black/25 text-white" : "border-slate-300 bg-slate-50 text-slate-800"
+          }`}>
             <input 
               type="file" 
               id="file-upload" 
@@ -172,16 +206,18 @@ const DocumentUploadWidget = ({ onUpload, disabled }) => {
               disabled={disabled || isUploading}
               onChange={e => setFile(e.target.files[0])}
             />
-            <label htmlFor="file-upload" className="cursor-pointer bg-white/5 hover:bg-white/10 border border-white/10 px-4 py-2 rounded-lg text-xs font-semibold transition-all">
+            <label htmlFor="file-upload" className={`cursor-pointer border px-4 py-2 rounded-lg text-xs font-bold transition-all ${
+              isDarkMode ? "bg-white/10 border-white/20 hover:bg-white/20 text-white" : "bg-white border-slate-300 hover:bg-slate-100 text-slate-900 shadow-sm"
+            }`}>
               {file ? "Change File" : "Choose File"}
             </label>
-            {file && <p className="text-xs text-secondary font-mono mt-1 text-center truncate w-full px-4">{file.name}</p>}
+            {file && <p className="text-xs text-emerald-600 font-mono mt-1 text-center truncate w-full px-4 font-bold">{file.name}</p>}
           </div>
           
           <button 
             onClick={handleUpload} 
             disabled={disabled || !file || isUploading}
-            className="mt-1 w-full bg-primary hover:brightness-110 text-on-primary font-bold py-2.5 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 text-sm shadow-[0_0_15px_rgba(41,161,149,0.3)]"
+            className="mt-1 w-full bg-sky-600 hover:bg-sky-500 text-white font-bold py-2.5 rounded-xl transition-all disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2 text-sm shadow-md active:scale-95 cursor-pointer"
           >
             {isUploading ? "Uploading..." : "Upload Document"}
           </button>
@@ -191,7 +227,7 @@ const DocumentUploadWidget = ({ onUpload, disabled }) => {
   );
 };
 
-const HardwareProcurementWidget = ({ onSubmit, disabled }) => {
+const HardwareProcurementWidget = ({ onSubmit, disabled, isDarkMode }) => {
   const [laptop, setLaptop] = useState("MacBook Pro M3 Max (32GB)");
   const [monitors, setMonitors] = useState("Dual 27-inch 4K Displays");
   const [peripherals, setPeripherals] = useState("Ergonomic Keyboard & Precision Mouse");
@@ -203,44 +239,73 @@ const HardwareProcurementWidget = ({ onSubmit, disabled }) => {
   };
 
   return (
-    <div className="bg-black/40 border border-primary/30 rounded-2xl p-5 shadow-lg w-full min-w-[300px] max-w-sm flex flex-col gap-4 animate-fade-in-up">
-      <h3 className="text-primary font-bold flex items-center gap-2 text-sm"><Cpu className="w-4 h-4"/> Hardware Workstation Order</h3>
+    <div className={`rounded-2xl p-5 shadow-lg w-full min-w-[300px] max-w-sm flex flex-col gap-4 animate-fade-in-up border ${
+      isDarkMode ? "bg-slate-900/90 border-sky-500/30 text-white" : "bg-white border-slate-300 text-slate-900 shadow-md"
+    }`}>
+      <h3 className={`font-bold flex items-center gap-2 text-sm ${isDarkMode ? "text-sky-400" : "text-sky-700"}`}>
+        <Cpu className="w-4 h-4"/> Hardware Workstation Order
+      </h3>
       {submitted ? (
         <div className="flex flex-col items-center gap-2 text-center py-4">
-          <CheckCircle2 className="w-10 h-10 text-secondary" />
-          <p className="text-sm font-semibold text-white">Order Submitted for Approval</p>
-          <p className="text-xs text-on-surface-variant font-mono">{laptop}</p>
+          <CheckCircle2 className="w-10 h-10 text-emerald-500" />
+          <p className={`text-sm font-bold ${isDarkMode ? "text-white" : "text-slate-900"}`}>Order Submitted for Approval</p>
+          <p className={`text-xs font-mono ${isDarkMode ? "text-slate-400" : "text-slate-600 font-semibold"}`}>{laptop}</p>
         </div>
       ) : (
         <>
           <div className="flex flex-col gap-1.5 text-left">
-            <label className="text-[10px] font-mono uppercase text-on-surface-variant">Laptop Model</label>
-            <select value={laptop} onChange={e => setLaptop(e.target.value)} disabled={disabled} className="bg-black/30 border border-white/10 rounded-lg p-2 text-xs text-white focus:outline-none focus:border-primary">
-              <option value="MacBook Pro M3 Max (32GB)" className="text-black">MacBook Pro M3 Max (32GB)</option>
-              <option value="Dell XPS 15 Touch (64GB)" className="text-black">Dell XPS 15 Touch (64GB)</option>
-              <option value="Lenovo ThinkPad X1 Carbon" className="text-black">Lenovo ThinkPad X1 Carbon</option>
+            <label className={`text-[10px] font-mono uppercase font-bold ${isDarkMode ? "text-slate-400" : "text-slate-700"}`}>Laptop Model</label>
+            <select 
+              value={laptop} 
+              onChange={e => setLaptop(e.target.value)} 
+              disabled={disabled} 
+              className={`rounded-lg p-2 text-xs border focus:outline-none focus:ring-1 focus:ring-sky-500 font-semibold ${
+                isDarkMode ? "bg-slate-950 border-white/20 text-white" : "bg-slate-100 border-slate-300 text-slate-900"
+              }`}
+            >
+              <option value="MacBook Pro M3 Max (32GB)" className={isDarkMode ? "bg-slate-900 text-white" : "bg-white text-slate-900"}>MacBook Pro M3 Max (32GB)</option>
+              <option value="Dell XPS 15 Touch (64GB)" className={isDarkMode ? "bg-slate-900 text-white" : "bg-white text-slate-900"}>Dell XPS 15 Touch (64GB)</option>
+              <option value="Lenovo ThinkPad X1 Carbon" className={isDarkMode ? "bg-slate-900 text-white" : "bg-white text-slate-900"}>Lenovo ThinkPad X1 Carbon</option>
             </select>
           </div>
 
           <div className="flex flex-col gap-1.5 text-left">
-            <label className="text-[10px] font-mono uppercase text-on-surface-variant">Display Options</label>
-            <select value={monitors} onChange={e => setMonitors(e.target.value)} disabled={disabled} className="bg-black/30 border border-white/10 rounded-lg p-2 text-xs text-white focus:outline-none focus:border-primary">
-              <option value="Dual 27-inch 4K Displays" className="text-black">Dual 27-inch 4K Displays</option>
-              <option value="34-inch Curved UltraWide Monitor" className="text-black">34-inch Curved UltraWide Monitor</option>
-              <option value="Single 27-inch 4K Display" className="text-black">Single 27-inch 4K Display</option>
+            <label className={`text-[10px] font-mono uppercase font-bold ${isDarkMode ? "text-slate-400" : "text-slate-700"}`}>Display Options</label>
+            <select 
+              value={monitors} 
+              onChange={e => setMonitors(e.target.value)} 
+              disabled={disabled} 
+              className={`rounded-lg p-2 text-xs border focus:outline-none focus:ring-1 focus:ring-sky-500 font-semibold ${
+                isDarkMode ? "bg-slate-950 border-white/20 text-white" : "bg-slate-100 border-slate-300 text-slate-900"
+              }`}
+            >
+              <option value="Dual 27-inch 4K Displays" className={isDarkMode ? "bg-slate-900 text-white" : "bg-white text-slate-900"}>Dual 27-inch 4K Displays</option>
+              <option value="34-inch Curved UltraWide Monitor" className={isDarkMode ? "bg-slate-900 text-white" : "bg-white text-slate-900"}>34-inch Curved UltraWide Monitor</option>
+              <option value="Single 27-inch 4K Display" className={isDarkMode ? "bg-slate-900 text-white" : "bg-white text-slate-900"}>Single 27-inch 4K Display</option>
             </select>
           </div>
 
           <div className="flex flex-col gap-1.5 text-left">
-            <label className="text-[10px] font-mono uppercase text-on-surface-variant">Accessories</label>
-            <select value={peripherals} onChange={e => setPeripherals(e.target.value)} disabled={disabled} className="bg-black/30 border border-white/10 rounded-lg p-2 text-xs text-white focus:outline-none focus:border-primary">
-              <option value="Ergonomic Keyboard & Precision Mouse" className="text-black">Ergonomic Keyboard & Precision Mouse</option>
-              <option value="Noise-Canceling Wireless Headset" className="text-black">Noise-Canceling Wireless Headset</option>
-              <option value="Complete Developer Bundle" className="text-black">Complete Developer Bundle</option>
+            <label className={`text-[10px] font-mono uppercase font-bold ${isDarkMode ? "text-slate-400" : "text-slate-700"}`}>Accessories</label>
+            <select 
+              value={peripherals} 
+              onChange={e => setPeripherals(e.target.value)} 
+              disabled={disabled} 
+              className={`rounded-lg p-2 text-xs border focus:outline-none focus:ring-1 focus:ring-sky-500 font-semibold ${
+                isDarkMode ? "bg-slate-950 border-white/20 text-white" : "bg-slate-100 border-slate-300 text-slate-900"
+              }`}
+            >
+              <option value="Ergonomic Keyboard & Precision Mouse" className={isDarkMode ? "bg-slate-900 text-white" : "bg-white text-slate-900"}>Ergonomic Keyboard & Precision Mouse</option>
+              <option value="Noise-Canceling Wireless Headset" className={isDarkMode ? "bg-slate-900 text-white" : "bg-white text-slate-900"}>Noise-Canceling Wireless Headset</option>
+              <option value="Complete Developer Bundle" className={isDarkMode ? "bg-slate-900 text-white" : "bg-white text-slate-900"}>Complete Developer Bundle</option>
             </select>
           </div>
 
-          <button onClick={handleSubmit} disabled={disabled} className="mt-1 w-full bg-primary hover:brightness-110 text-on-primary font-bold py-2.5 rounded-lg transition-colors text-sm flex items-center justify-center gap-2 shadow-[0_0_15px_rgba(41,161,149,0.3)]">
+          <button 
+            onClick={handleSubmit} 
+            disabled={disabled} 
+            className="mt-1 w-full bg-sky-600 hover:bg-sky-500 text-white font-bold py-2.5 rounded-xl transition-all text-sm flex items-center justify-center gap-2 shadow-md active:scale-95 cursor-pointer"
+          >
             <CheckCircle2 className="w-4 h-4"/> Submit Hardware Order
           </button>
         </>
@@ -249,7 +314,7 @@ const HardwareProcurementWidget = ({ onSubmit, disabled }) => {
   );
 };
 
-const ESignatureWidget = ({ onSubmit, disabled }) => {
+const ESignatureWidget = ({ onSubmit, disabled, isDarkMode }) => {
   const canvasRef = useRef(null);
   const [isSigned, setIsSigned] = useState(false);
   const [submitted, setSubmitted] = useState(false);
@@ -272,8 +337,8 @@ const ESignatureWidget = ({ onSubmit, disabled }) => {
 
     const handleMouseMove = (me) => {
       ctx.lineTo(me.clientX - rect.left, me.clientY - rect.top);
-      ctx.strokeStyle = "#29a195";
-      ctx.lineWidth = 2;
+      ctx.strokeStyle = isDarkMode ? "#38bdf8" : "#0284c7";
+      ctx.lineWidth = 2.5;
       ctx.stroke();
       setIsSigned(true);
     };
@@ -294,31 +359,45 @@ const ESignatureWidget = ({ onSubmit, disabled }) => {
   };
 
   return (
-    <div className="bg-black/40 border border-primary/30 rounded-2xl p-5 shadow-lg w-full min-w-[300px] max-w-sm flex flex-col gap-4 animate-fade-in-up">
-      <h3 className="text-primary font-bold flex items-center gap-2 text-sm"><PenTool className="w-4 h-4"/> Digital E-Signature Pad</h3>
+    <div className={`rounded-2xl p-5 shadow-lg w-full min-w-[300px] max-w-sm flex flex-col gap-4 animate-fade-in-up border ${
+      isDarkMode ? "bg-slate-900/90 border-sky-500/30 text-white" : "bg-white border-slate-300 text-slate-900 shadow-md"
+    }`}>
+      <h3 className={`font-bold flex items-center gap-2 text-sm ${isDarkMode ? "text-sky-400" : "text-sky-700"}`}>
+        <PenTool className="w-4 h-4"/> Digital E-Signature Pad
+      </h3>
       {submitted ? (
         <div className="flex flex-col items-center gap-2 text-center py-4">
-          <CheckCircle2 className="w-10 h-10 text-secondary" />
-          <p className="text-sm font-semibold text-white">Signature Recorded</p>
-          <p className="text-xs text-on-surface-variant font-mono">Employee NDA & Policy Agreement</p>
+          <CheckCircle2 className="w-10 h-10 text-emerald-500" />
+          <p className={`text-sm font-bold ${isDarkMode ? "text-white" : "text-slate-900"}`}>Signature Recorded</p>
+          <p className={`text-xs font-mono ${isDarkMode ? "text-slate-400" : "text-slate-600 font-semibold"}`}>Employee NDA & Policy Agreement</p>
         </div>
       ) : (
         <>
-          <p className="text-xs text-on-surface-variant leading-relaxed">Draw your digital signature below to execute the onboarding agreements:</p>
-          <div className="border border-white/20 rounded-xl bg-black/40 p-1">
+          <p className={`text-xs leading-relaxed ${isDarkMode ? "text-slate-300" : "text-slate-700 font-medium"}`}>Draw your digital signature below to execute the onboarding agreements:</p>
+          <div className={`border rounded-xl p-1 ${isDarkMode ? "border-white/20 bg-slate-950" : "border-slate-300 bg-slate-100"}`}>
             <canvas 
               ref={canvasRef}
               width={280}
               height={100}
               onMouseDown={handleMouseDown}
-              className="w-full bg-black/50 rounded-lg cursor-crosshair"
+              className={`w-full rounded-lg cursor-crosshair ${isDarkMode ? "bg-slate-950" : "bg-white"}`}
             />
           </div>
           <div className="flex gap-2">
-            <button onClick={clearCanvas} disabled={disabled} className="flex-1 bg-white/5 border border-white/10 hover:bg-white/10 text-white py-2 rounded-lg text-xs font-semibold">
+            <button 
+              onClick={clearCanvas} 
+              disabled={disabled} 
+              className={`flex-1 py-2 rounded-xl text-xs font-bold border transition-all ${
+                isDarkMode ? "bg-white/10 border-white/20 text-white hover:bg-white/20" : "bg-slate-100 border-slate-300 text-slate-800 hover:bg-slate-200"
+              }`}
+            >
               Clear
             </button>
-            <button onClick={handleSave} disabled={disabled || !isSigned} className="flex-1 bg-primary hover:brightness-110 text-on-primary py-2 rounded-lg text-xs font-bold disabled:opacity-50">
+            <button 
+              onClick={handleSave} 
+              disabled={disabled || !isSigned} 
+              className="flex-1 bg-sky-600 hover:bg-sky-500 text-white py-2 rounded-xl text-xs font-bold disabled:opacity-40 shadow-md active:scale-95"
+            >
               Confirm Signature
             </button>
           </div>
@@ -328,17 +407,24 @@ const ESignatureWidget = ({ onSubmit, disabled }) => {
   );
 };
 
-const PeerMentorCard = () => (
-  <div className="bg-black/40 border border-white/10 rounded-2xl p-4 flex items-center gap-3 shadow-lg max-w-sm">
-    <div className="w-10 h-10 rounded-full bg-primary/20 border border-primary/40 flex items-center justify-center font-bold text-primary text-sm font-mono">
+const PeerMentorCard = ({ isDarkMode }) => (
+  <div className={`rounded-2xl p-4 flex items-center gap-3 shadow-lg max-w-sm border ${
+    isDarkMode ? "bg-slate-900/90 border-white/15 text-white" : "bg-white border-slate-300 text-slate-900 shadow-md"
+  }`}>
+    <div className="w-10 h-10 rounded-full bg-sky-500/20 border border-sky-500/40 flex items-center justify-center font-bold text-sky-600 text-sm font-mono shrink-0">
       DV
     </div>
     <div className="flex-1 text-left">
-      <h4 className="text-xs font-bold text-white leading-tight">David Vance</h4>
-      <span className="text-[10px] text-primary font-mono block">Senior Onboarding Buddy</span>
-      <span className="text-[10px] text-on-surface-variant font-mono truncate block">d.vance@luminasystems.com</span>
+      <h4 className={`text-xs font-bold leading-tight ${isDarkMode ? "text-white" : "text-slate-900"}`}>David Vance</h4>
+      <span className="text-[10px] text-sky-600 font-mono font-bold block">Senior Onboarding Buddy</span>
+      <span className={`text-[10px] font-mono truncate block ${isDarkMode ? "text-slate-400" : "text-slate-600 font-semibold"}`}>d.vance@luminasystems.com</span>
     </div>
-    <a href="mailto:d.vance@luminasystems.com" className="px-2.5 py-1.5 rounded-lg bg-white/5 border border-white/10 hover:bg-white/10 text-[10px] font-semibold text-white transition-all">
+    <a 
+      href="mailto:d.vance@luminasystems.com" 
+      className={`px-3 py-1.5 rounded-xl border text-[10px] font-bold transition-all shrink-0 ${
+        isDarkMode ? "bg-white/10 border-white/20 text-white hover:bg-white/20" : "bg-sky-50 border-sky-300 text-sky-700 hover:bg-sky-100 shadow-sm"
+      }`}
+    >
       Connect
     </a>
   </div>
@@ -622,31 +708,31 @@ export default function ChatScreen({ user, onLogout }) {
             />
           </div>
           <div className="flex flex-col overflow-hidden text-left">
-            <h2 className="font-bold text-on-surface truncate text-base">{user?.name || "Alex Vance"}</h2>
-            <p className="text-xs text-on-surface-variant truncate capitalize">{user?.department || "Engineering"} • {user?.role || "Developer"}</p>
+            <h2 className={`font-bold truncate text-base ${isDarkMode ? "text-white" : "text-slate-900 font-extrabold"}`}>{user?.name || "Alex Vance"}</h2>
+            <p className={`text-xs truncate capitalize ${isDarkMode ? "text-slate-400" : "text-slate-600 font-medium"}`}>{user?.department || "Engineering"} • {user?.role || "Developer"}</p>
           </div>
         </div>
 
         {/* Onboarding Progress Gauge */}
-        <div className="pt-5 border-b border-white/10 pb-5 text-left flex flex-col gap-3">
+        <div className={`pt-5 border-b pb-5 text-left flex flex-col gap-3 ${isDarkMode ? "border-white/10" : "border-slate-300"}`}>
           <div className="flex justify-between items-center">
-            <h3 className="text-[11px] font-mono tracking-widest text-secondary uppercase font-bold">Onboarding Completion</h3>
-            <span className="text-xs font-bold text-secondary font-mono px-2 py-0.5 rounded bg-secondary/10 border border-secondary/20 glow-badge-success">{calculateProgress()}%</span>
+            <h3 className={`text-[11px] font-mono tracking-widest uppercase font-bold ${isDarkMode ? "text-sky-400" : "text-sky-700"}`}>Onboarding Completion</h3>
+            <span className={`text-xs font-bold font-mono px-2 py-0.5 rounded border ${isDarkMode ? "bg-emerald-500/20 text-emerald-400 border-emerald-500/30" : "bg-emerald-100 text-emerald-800 border-emerald-300 font-extrabold"}`}>{calculateProgress()}%</span>
           </div>
 
-          <div className="flex items-center gap-4 bg-black/30 p-3 rounded-xl border border-white/10 shadow-inner">
+          <div className={`flex items-center gap-4 p-3 rounded-xl border shadow-inner ${isDarkMode ? "bg-black/30 border-white/10" : "bg-white border-slate-300 shadow-sm"}`}>
             {/* SVG Circular Progress Ring */}
             <div className="relative w-14 h-14 shrink-0 flex items-center justify-center">
               <svg className="w-full h-full transform -rotate-90" viewBox="0 0 36 36">
                 <path
-                  className="text-white/10"
+                  className={isDarkMode ? "text-white/10" : "text-slate-200"}
                   strokeWidth="3.5"
                   stroke="currentColor"
                   fill="none"
                   d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
                 />
                 <path
-                  className="text-primary transition-all duration-700 ease-out"
+                  className="text-sky-500 transition-all duration-700 ease-out"
                   strokeDasharray={`${calculateProgress()}, 100`}
                   strokeWidth="3.5"
                   strokeLinecap="round"
@@ -655,112 +741,124 @@ export default function ChatScreen({ user, onLogout }) {
                   d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
                 />
               </svg>
-              <span className="absolute text-[11px] font-mono font-bold text-white">{calculateProgress()}%</span>
+              <span className={`absolute text-[11px] font-mono font-extrabold ${isDarkMode ? "text-white" : "text-slate-900"}`}>{calculateProgress()}%</span>
             </div>
 
             <div className="flex flex-col gap-1 overflow-hidden">
-              <span className="text-xs font-semibold text-white truncate">Milestone Tracker</span>
-              <span className="text-[10px] text-on-surface-variant font-mono">
+              <span className={`text-xs font-bold truncate ${isDarkMode ? "text-white" : "text-slate-900"}`}>Milestone Tracker</span>
+              <span className={`text-[10px] font-mono ${isDarkMode ? "text-slate-400" : "text-slate-600 font-semibold"}`}>
                 {Object.values(onboardingTasks).filter(v => v).length} of {Object.keys(onboardingTasks).length} tasks completed
               </span>
             </div>
           </div>
 
           <ul className="flex flex-col gap-1.5 text-xs pt-1">
-            <li className="flex items-center gap-2 text-on-surface-variant">
-              <ShieldCheck className={`w-3.5 h-3.5 ${onboardingTasks.login ? "text-green-400" : "text-white/20"}`} />
-              <span className={onboardingTasks.login ? "line-through opacity-60" : "text-white/80"}>Workspace Registration</span>
+            <li className="flex items-center gap-2">
+              <ShieldCheck className={`w-3.5 h-3.5 ${onboardingTasks.login ? "text-emerald-500" : isDarkMode ? "text-white/20" : "text-slate-300"}`} />
+              <span className={onboardingTasks.login ? "line-through opacity-60 text-slate-500" : isDarkMode ? "text-white/90" : "text-slate-800 font-semibold"}>Workspace Registration</span>
             </li>
-            <li className="flex items-center gap-2 text-on-surface-variant">
-              <ShieldCheck className={`w-3.5 h-3.5 ${onboardingTasks.policy ? "text-green-400" : "text-white/20"}`} />
-              <span className={onboardingTasks.policy ? "line-through opacity-60" : "text-white/80"}>Ask Policy Question</span>
+            <li className="flex items-center gap-2">
+              <ShieldCheck className={`w-3.5 h-3.5 ${onboardingTasks.policy ? "text-emerald-500" : isDarkMode ? "text-white/20" : "text-slate-300"}`} />
+              <span className={onboardingTasks.policy ? "line-through opacity-60 text-slate-500" : isDarkMode ? "text-white/90" : "text-slate-800 font-semibold"}>Ask Policy Question</span>
             </li>
-            <li className="flex items-center gap-2 text-on-surface-variant">
-              <ShieldCheck className={`w-3.5 h-3.5 ${onboardingTasks.leave ? "text-green-400" : "text-white/20"}`} />
-              <span className={onboardingTasks.leave ? "line-through opacity-60" : "text-white/80"}>Leave Request</span>
+            <li className="flex items-center gap-2">
+              <ShieldCheck className={`w-3.5 h-3.5 ${onboardingTasks.leave ? "text-emerald-500" : isDarkMode ? "text-white/20" : "text-slate-300"}`} />
+              <span className={onboardingTasks.leave ? "line-through opacity-60 text-slate-500" : isDarkMode ? "text-white/90" : "text-slate-800 font-semibold"}>Leave Request</span>
             </li>
-            <li className="flex items-center gap-2 text-on-surface-variant">
-              <ShieldCheck className={`w-3.5 h-3.5 ${onboardingTasks.it ? "text-green-400" : "text-white/20"}`} />
-              <span className={onboardingTasks.it ? "line-through opacity-60" : "text-white/80"}>IT Provisioning</span>
+            <li className="flex items-center gap-2">
+              <ShieldCheck className={`w-3.5 h-3.5 ${onboardingTasks.it ? "text-emerald-500" : isDarkMode ? "text-white/20" : "text-slate-300"}`} />
+              <span className={onboardingTasks.it ? "line-through opacity-60 text-slate-500" : isDarkMode ? "text-white/90" : "text-slate-800 font-semibold"}>IT Provisioning</span>
             </li>
-            <li className="flex items-center gap-2 text-on-surface-variant">
-              <ShieldCheck className={`w-3.5 h-3.5 ${onboardingTasks.doc ? "text-green-400" : "text-white/20"}`} />
-              <span className={onboardingTasks.doc ? "line-through opacity-60" : "text-white/80"}>Document Upload</span>
+            <li className="flex items-center gap-2">
+              <ShieldCheck className={`w-3.5 h-3.5 ${onboardingTasks.doc ? "text-emerald-500" : isDarkMode ? "text-white/20" : "text-slate-300"}`} />
+              <span className={onboardingTasks.doc ? "line-through opacity-60 text-slate-500" : isDarkMode ? "text-white/90" : "text-slate-800 font-semibold"}>Document Upload</span>
             </li>
           </ul>
         </div>
 
         {/* Quick Actions with 3D Card Hover */}
         <div className="pt-4 flex-1 text-left">
-          <h3 className="text-[11px] font-mono tracking-widest text-tertiary mb-3 uppercase font-bold">Quick Actions</h3>
+          <h3 className={`text-[11px] font-mono tracking-widest mb-3 uppercase font-bold ${isDarkMode ? "text-sky-400" : "text-sky-700"}`}>Quick Actions</h3>
           <nav className="flex flex-col gap-1.5">
             <button 
               onClick={() => sendMessage("I would like to request leave")}
               disabled={isLoading || !!pendingApprovalId}
-              className="glass-card-hover flex items-center gap-3 p-2.5 rounded-xl bg-white/5 border border-white/10 text-on-surface hover:bg-white/10 transition-all duration-200 group w-full text-left disabled:opacity-50"
+              className={`glass-card-hover flex items-center gap-3 p-2.5 rounded-xl border transition-all duration-200 group w-full text-left disabled:opacity-50 ${
+                isDarkMode ? "bg-white/5 border-white/10 text-white hover:bg-white/10" : "bg-white border-slate-300 text-slate-900 hover:bg-slate-50 shadow-sm"
+              }`}
             >
-              <div className="p-1.5 rounded-lg bg-primary/20 text-primary group-hover:scale-110 transition-transform">
+              <div className="p-1.5 rounded-lg bg-sky-500/20 text-sky-600 group-hover:scale-110 transition-transform">
                 <Calendar className="w-4 h-4" />
               </div>
-              <span className="text-xs font-semibold text-white">Request Leave</span>
+              <span className={`text-xs font-bold ${isDarkMode ? "text-white" : "text-slate-900"}`}>Request Leave</span>
             </button>
             <button 
               onClick={() => sendMessage("I need help setting up my software accounts")}
               disabled={isLoading || !!pendingApprovalId}
-              className="glass-card-hover flex items-center gap-3 p-2.5 rounded-xl bg-white/5 border border-white/10 text-on-surface hover:bg-white/10 transition-all duration-200 group w-full text-left disabled:opacity-50"
+              className={`glass-card-hover flex items-center gap-3 p-2.5 rounded-xl border transition-all duration-200 group w-full text-left disabled:opacity-50 ${
+                isDarkMode ? "bg-white/5 border-white/10 text-white hover:bg-white/10" : "bg-white border-slate-300 text-slate-900 hover:bg-slate-50 shadow-sm"
+              }`}
             >
-              <div className="p-1.5 rounded-lg bg-secondary/20 text-secondary group-hover:scale-110 transition-transform">
+              <div className="p-1.5 rounded-lg bg-emerald-500/20 text-emerald-600 group-hover:scale-110 transition-transform">
                 <LifeBuoy className="w-4 h-4" />
               </div>
-              <span className="text-xs font-semibold text-white">IT Help</span>
+              <span className={`text-xs font-bold ${isDarkMode ? "text-white" : "text-slate-900"}`}>IT Help</span>
             </button>
             <button 
               onClick={() => setMessages(prev => [...prev, { sender: "knowledge_rag", content: "WIDGET:DOCUMENT_UPLOAD" }])}
               disabled={isLoading || !!pendingApprovalId}
-              className="glass-card-hover flex items-center gap-3 p-2.5 rounded-xl bg-white/5 border border-white/10 text-on-surface hover:bg-white/10 transition-all duration-200 group w-full text-left disabled:opacity-50"
+              className={`glass-card-hover flex items-center gap-3 p-2.5 rounded-xl border transition-all duration-200 group w-full text-left disabled:opacity-50 ${
+                isDarkMode ? "bg-white/5 border-white/10 text-white hover:bg-white/10" : "bg-white border-slate-300 text-slate-900 hover:bg-slate-50 shadow-sm"
+              }`}
             >
-              <div className="p-1.5 rounded-lg bg-tertiary/20 text-tertiary group-hover:scale-110 transition-transform">
+              <div className="p-1.5 rounded-lg bg-indigo-500/20 text-indigo-600 group-hover:scale-110 transition-transform">
                 <FileText className="w-4 h-4" />
               </div>
-              <span className="text-xs font-semibold text-white">Documents</span>
+              <span className={`text-xs font-bold ${isDarkMode ? "text-white" : "text-slate-900"}`}>Documents</span>
             </button>
             <button 
               onClick={() => setMessages(prev => [...prev, { sender: "it_provisioner", content: "WIDGET:HARDWARE_ORDER" }])}
               disabled={isLoading || !!pendingApprovalId}
-              className="glass-card-hover flex items-center gap-3 p-2.5 rounded-xl bg-white/5 border border-white/10 text-on-surface hover:bg-white/10 transition-all duration-200 group w-full text-left disabled:opacity-50"
+              className={`glass-card-hover flex items-center gap-3 p-2.5 rounded-xl border transition-all duration-200 group w-full text-left disabled:opacity-50 ${
+                isDarkMode ? "bg-white/5 border-white/10 text-white hover:bg-white/10" : "bg-white border-slate-300 text-slate-900 hover:bg-slate-50 shadow-sm"
+              }`}
             >
-              <div className="p-1.5 rounded-lg bg-blue-500/20 text-blue-400 group-hover:scale-110 transition-transform">
+              <div className="p-1.5 rounded-lg bg-blue-500/20 text-blue-600 group-hover:scale-110 transition-transform">
                 <Cpu className="w-4 h-4" />
               </div>
-              <span className="text-xs font-semibold text-white">Hardware Order</span>
+              <span className={`text-xs font-bold ${isDarkMode ? "text-white" : "text-slate-900"}`}>Hardware Order</span>
             </button>
             <button 
               onClick={() => setMessages(prev => [...prev, { sender: "knowledge_rag", content: "WIDGET:E_SIGNATURE" }])}
               disabled={isLoading || !!pendingApprovalId}
-              className="glass-card-hover flex items-center gap-3 p-2.5 rounded-xl bg-white/5 border border-white/10 text-on-surface hover:bg-white/10 transition-all duration-200 group w-full text-left disabled:opacity-50"
+              className={`glass-card-hover flex items-center gap-3 p-2.5 rounded-xl border transition-all duration-200 group w-full text-left disabled:opacity-50 ${
+                isDarkMode ? "bg-white/5 border-white/10 text-white hover:bg-white/10" : "bg-white border-slate-300 text-slate-900 hover:bg-slate-50 shadow-sm"
+              }`}
             >
-              <div className="p-1.5 rounded-lg bg-purple-500/20 text-purple-400 group-hover:scale-110 transition-transform">
+              <div className="p-1.5 rounded-lg bg-purple-500/20 text-purple-600 group-hover:scale-110 transition-transform">
                 <PenTool className="w-4 h-4" />
               </div>
-              <span className="text-xs font-semibold text-white">Sign Policy</span>
+              <span className={`text-xs font-bold ${isDarkMode ? "text-white" : "text-slate-900"}`}>Sign Policy</span>
             </button>
             <button 
               onClick={() => setMessages(prev => [...prev, { sender: "knowledge_rag", content: "WIDGET:PEER_MENTOR" }])}
               disabled={isLoading || !!pendingApprovalId}
-              className="glass-card-hover flex items-center gap-3 p-2.5 rounded-xl bg-white/5 border border-white/10 text-on-surface hover:bg-white/10 transition-all duration-200 group w-full text-left disabled:opacity-50"
+              className={`glass-card-hover flex items-center gap-3 p-2.5 rounded-xl border transition-all duration-200 group w-full text-left disabled:opacity-50 ${
+                isDarkMode ? "bg-white/5 border-white/10 text-white hover:bg-white/10" : "bg-white border-slate-300 text-slate-900 hover:bg-slate-50 shadow-sm"
+              }`}
             >
-              <div className="p-1.5 rounded-lg bg-emerald-500/20 text-emerald-400 group-hover:scale-110 transition-transform">
+              <div className="p-1.5 rounded-lg bg-emerald-500/20 text-emerald-600 group-hover:scale-110 transition-transform">
                 <UserCheck className="w-4 h-4" />
               </div>
-              <span className="text-xs font-semibold text-white">Peer Mentor</span>
+              <span className={`text-xs font-bold ${isDarkMode ? "text-white" : "text-slate-900"}`}>Peer Mentor</span>
             </button>
           </nav>
 
           {/* HR Contact Block */}
-          <div className="mt-8 p-4 rounded-lg bg-black/20 border border-white/10 text-left">
-            <h3 className="text-[10px] font-mono tracking-widest text-tertiary mb-1.5 uppercase">HR Contact</h3>
-            <p className="text-xs font-semibold text-on-surface">Sarah Jenkins</p>
-            <p className="text-[11px] text-on-surface-variant mt-0.5">s.jenkins@company.com</p>
+          <div className={`mt-6 p-4 rounded-xl border text-left ${isDarkMode ? "bg-black/20 border-white/10" : "bg-white border-slate-300 shadow-sm"}`}>
+            <h3 className={`text-[10px] font-mono tracking-widest mb-1.5 uppercase font-bold ${isDarkMode ? "text-sky-400" : "text-sky-700"}`}>HR Contact</h3>
+            <p className={`text-xs font-bold ${isDarkMode ? "text-white" : "text-slate-900"}`}>Sarah Jenkins</p>
+            <p className={`text-[11px] mt-0.5 ${isDarkMode ? "text-slate-400" : "text-slate-600 font-semibold"}`}>s.jenkins@company.com</p>
           </div>
         </div>
 
@@ -952,9 +1050,11 @@ export default function ChatScreen({ user, onLogout }) {
             <div key={i} className={`flex w-full ${msg.sender === "user" ? "justify-end" : "justify-start"}`}>
               {msg.sender === "user" ? (
                 <div className="max-w-[75%] md:max-w-[60%] flex flex-col items-end gap-1 animate-fade-in-up">
-                  <div className="px-5 py-3 rounded-2xl rounded-tr-sm bg-gradient-to-br from-[#1c2e5e] to-[#334576] border border-primary/20 shadow-lg text-white backdrop-blur-md text-sm md:text-[15px] leading-relaxed text-left">
+                  <div className={`px-5 py-3 rounded-2xl rounded-tr-sm shadow-lg text-white text-sm md:text-[15px] leading-relaxed text-left ${
+                    isDarkMode ? "bg-gradient-to-br from-[#1c2e5e] to-[#334576] border border-primary/20" : "bg-sky-600 shadow-md font-medium"
+                  }`}>
                     {msg.content.startsWith("ACTION:SUBMIT_LEAVE|") || msg.content.startsWith("ACTION:SUBMIT_IT|") || msg.content.startsWith("ACTION:SUBMIT_DOC|") ? (
-                      <span className="italic opacity-70">Form Submitted</span>
+                      <span className="italic opacity-80">Form Submitted</span>
                     ) : (
                       renderFormattedMessage(msg.content)
                     )}
@@ -962,59 +1062,78 @@ export default function ChatScreen({ user, onLogout }) {
                 </div>
               ) : (
                 <div className="flex gap-3 max-w-[85%] md:max-w-[70%] animate-fade-in-up">
-                  <div className="w-8 h-8 rounded-full bg-black/40 border border-primary/30 flex items-center justify-center shrink-0 mt-1">
-                    <Bot className="w-4 h-4 text-primary" />
+                  <div className={`w-8 h-8 rounded-full border flex items-center justify-center shrink-0 mt-1 ${
+                    isDarkMode ? "bg-black/40 border-primary/30 text-primary" : "bg-sky-100 border-sky-300 text-sky-700 shadow-sm"
+                  }`}>
+                    <Bot className="w-4 h-4" />
                   </div>
                   <div className="flex flex-col items-start gap-1">
                     {msg.content === "WIDGET:LEAVE_FORM" ? (
                       <LeaveRequestWidget 
                         onSubmit={sendMessage} 
                         disabled={isLoading || !!pendingApprovalId || i !== messages.length - 1} 
+                        isDarkMode={isDarkMode}
                       />
                     ) : msg.content === "WIDGET:IT_PROVISION_FORM" ? (
                       <ITProvisioningWidget 
                         onSubmit={sendMessage} 
                         disabled={isLoading || !!pendingApprovalId || i !== messages.length - 1} 
+                        isDarkMode={isDarkMode}
                       />
                     ) : msg.content === "WIDGET:HARDWARE_ORDER" ? (
                       <HardwareProcurementWidget 
                         onSubmit={sendMessage} 
                         disabled={isLoading || !!pendingApprovalId || i !== messages.length - 1} 
+                        isDarkMode={isDarkMode}
                       />
                     ) : msg.content === "WIDGET:E_SIGNATURE" ? (
                       <ESignatureWidget 
                         onSubmit={sendMessage} 
                         disabled={isLoading || !!pendingApprovalId || i !== messages.length - 1} 
+                        isDarkMode={isDarkMode}
                       />
                     ) : msg.content === "WIDGET:PEER_MENTOR" ? (
-                      <PeerMentorCard />
+                      <PeerMentorCard isDarkMode={isDarkMode} />
                     ) : msg.content === "WIDGET:DOCUMENT_UPLOAD" ? (
                       <DocumentUploadWidget 
                         onUpload={sendMessage} 
                         disabled={isLoading || !!pendingApprovalId || i !== messages.length - 1} 
+                        isDarkMode={isDarkMode}
                       />
                     ) : msg.content.startsWith("ACTION:SUBMIT_HARDWARE|") ? (
-                      <div className="px-5 py-3 rounded-2xl rounded-tl-sm glass-panel text-white/50 shadow-lg text-sm italic md:text-[15px] leading-relaxed text-left">
+                      <div className={`px-5 py-3 rounded-2xl rounded-tl-sm border text-sm italic md:text-[15px] leading-relaxed text-left ${
+                        isDarkMode ? "glass-panel text-white/60" : "bg-white border-slate-300 text-slate-600 shadow-sm"
+                      }`}>
                         [Hardware Procurement Order Submitted]
                       </div>
                     ) : msg.content.startsWith("ACTION:SUBMIT_SIGNATURE|") ? (
-                      <div className="px-5 py-3 rounded-2xl rounded-tl-sm glass-panel text-white/50 shadow-lg text-sm italic md:text-[15px] leading-relaxed text-left">
+                      <div className={`px-5 py-3 rounded-2xl rounded-tl-sm border text-sm italic md:text-[15px] leading-relaxed text-left ${
+                        isDarkMode ? "glass-panel text-white/60" : "bg-white border-slate-300 text-slate-600 shadow-sm"
+                      }`}>
                         [Digital Signature Recorded]
                       </div>
                     ) : msg.content.startsWith("ACTION:SUBMIT_LEAVE|") ? (
-                      <div className="px-5 py-3 rounded-2xl rounded-tl-sm glass-panel text-white/50 shadow-lg text-sm italic md:text-[15px] leading-relaxed text-left">
+                      <div className={`px-5 py-3 rounded-2xl rounded-tl-sm border text-sm italic md:text-[15px] leading-relaxed text-left ${
+                        isDarkMode ? "glass-panel text-white/60" : "bg-white border-slate-300 text-slate-600 shadow-sm"
+                      }`}>
                         [Leave Request Form Submitted]
                       </div>
                     ) : msg.content.startsWith("ACTION:SUBMIT_IT|") ? (
-                      <div className="px-5 py-3 rounded-2xl rounded-tl-sm glass-panel text-white/50 shadow-lg text-sm italic md:text-[15px] leading-relaxed text-left">
+                      <div className={`px-5 py-3 rounded-2xl rounded-tl-sm border text-sm italic md:text-[15px] leading-relaxed text-left ${
+                        isDarkMode ? "glass-panel text-white/60" : "bg-white border-slate-300 text-slate-600 shadow-sm"
+                      }`}>
                         [IT Provisioning Form Submitted]
                       </div>
                     ) : msg.content.startsWith("ACTION:SUBMIT_DOC|") ? (
-                      <div className="px-5 py-3 rounded-2xl rounded-tl-sm glass-panel text-white/50 shadow-lg text-sm italic md:text-[15px] leading-relaxed text-left">
+                      <div className={`px-5 py-3 rounded-2xl rounded-tl-sm border text-sm italic md:text-[15px] leading-relaxed text-left ${
+                        isDarkMode ? "glass-panel text-white/60" : "bg-white border-slate-300 text-slate-600 shadow-sm"
+                      }`}>
                         [Document Upload Form Submitted]
                       </div>
                     ) : (
-                      <div className="px-5 py-3 rounded-2xl rounded-tl-sm glass-panel text-white shadow-lg text-sm md:text-[15px] leading-relaxed text-left">
+                      <div className={`px-5 py-3 rounded-2xl rounded-tl-sm border shadow-lg text-sm md:text-[15px] leading-relaxed text-left ${
+                        isDarkMode ? "glass-panel text-white" : "bg-white border-slate-300 text-slate-900 font-medium shadow-md"
+                      }`}>
                         {renderFormattedMessage(msg.content)}
                       </div>
                     )}
@@ -1027,13 +1146,17 @@ export default function ChatScreen({ user, onLogout }) {
           {isLoading && (
             <div className="flex justify-start w-full">
               <div className="flex gap-3 max-w-[85%] md:max-w-[70%] animate-fade-in-up">
-                <div className="w-8 h-8 rounded-full bg-black/40 border border-primary/30 flex items-center justify-center shrink-0 mt-1">
+                <div className={`w-8 h-8 rounded-full border flex items-center justify-center shrink-0 mt-1 ${
+                  isDarkMode ? "bg-black/40 border-primary/30 text-primary" : "bg-sky-100 border-sky-300 text-sky-700 shadow-sm"
+                }`}>
                   <Bot className="w-4 h-4 text-primary" />
                 </div>
-                <div className="px-5 py-3 rounded-2xl rounded-tl-sm glass-panel text-white shadow-lg flex items-center gap-2">
-                  <span className="w-2 h-2 bg-primary rounded-full animate-bounce" style={{ animationDelay: "0ms" }}></span>
-                  <span className="w-2 h-2 bg-primary rounded-full animate-bounce" style={{ animationDelay: "150ms" }}></span>
-                  <span className="w-2 h-2 bg-primary rounded-full animate-bounce" style={{ animationDelay: "300ms" }}></span>
+                <div className={`px-5 py-3 rounded-2xl rounded-tl-sm border flex items-center gap-2 ${
+                  isDarkMode ? "glass-panel text-white" : "bg-white border-slate-300 text-slate-900 shadow-md"
+                }`}>
+                  <span className="w-2 h-2 bg-sky-500 rounded-full animate-bounce" style={{ animationDelay: "0ms" }}></span>
+                  <span className="w-2 h-2 bg-sky-500 rounded-full animate-bounce" style={{ animationDelay: "150ms" }}></span>
+                  <span className="w-2 h-2 bg-sky-500 rounded-full animate-bounce" style={{ animationDelay: "300ms" }}></span>
                 </div>
               </div>
             </div>
@@ -1048,24 +1171,24 @@ export default function ChatScreen({ user, onLogout }) {
                     ? "border-green-500/40 bg-green-500/10 shadow-[0_0_15px_rgba(34,197,94,0.15)]"
                     : approvalStatus === "rejected"
                     ? "border-red-500/40 bg-red-500/10 shadow-[0_0_15px_rgba(239,68,68,0.15)]"
-                    : "border-secondary/30 bg-black/30 shadow-[0_0_15px_rgba(41,161,149,0.15)] animate-subtle-pulse"
+                    : isDarkMode
+                    ? "border-secondary/30 bg-black/30 shadow-[0_0_15px_rgba(41,161,149,0.15)] animate-subtle-pulse"
+                    : "border-sky-300 bg-sky-50 shadow-md"
                 }`}>
-                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent -translate-x-full animate-[shimmer_2s_infinite]"></div>
-                  
                   <div className="flex items-center gap-3">
                     {approvalStatus === "approved" ? (
-                      <CheckCircle2 className="w-5 h-5 text-green-400" />
+                      <CheckCircle2 className="w-5 h-5 text-green-500" />
                     ) : approvalStatus === "rejected" ? (
-                      <XCircle className="w-5 h-5 text-red-400" />
+                      <XCircle className="w-5 h-5 text-red-500" />
                     ) : (
-                      <Clock className="w-5 h-5 text-secondary animate-pulse" />
+                      <Clock className="w-5 h-5 text-sky-600 animate-pulse" />
                     )}
-                    <span className={`text-xs font-semibold ${
+                    <span className={`text-xs font-bold ${
                       approvalStatus === "approved" 
-                        ? "text-green-400" 
+                        ? "text-green-600" 
                         : approvalStatus === "rejected"
-                        ? "text-red-400" 
-                        : "text-secondary"
+                        ? "text-red-600" 
+                        : isDarkMode ? "text-sky-300" : "text-sky-800"
                     }`}>
                       {approvalStatus === "approved" 
                         ? "Request Approved! Resuming conversation..." 
@@ -1078,7 +1201,7 @@ export default function ChatScreen({ user, onLogout }) {
                   {approvalStatus === "pending" && (
                     <button 
                       onClick={handleRefreshStatus}
-                      className="bg-secondary-container hover:brightness-110 text-on-secondary-container text-[11px] font-bold px-3 py-1.5 rounded-lg transition-all flex items-center gap-1.5 relative z-10 shrink-0"
+                      className="bg-sky-600 hover:bg-sky-700 text-white text-[11px] font-bold px-3 py-1.5 rounded-lg transition-all flex items-center gap-1.5 shrink-0 shadow-sm"
                     >
                       <RefreshCw className="w-3.5 h-3.5" />
                       Refresh Status
@@ -1093,7 +1216,9 @@ export default function ChatScreen({ user, onLogout }) {
         </div>
 
         {/* Input Area */}
-        <div className="p-6 pt-4 bg-gradient-to-t from-surface via-surface/90 to-transparent shrink-0">
+        <div className={`p-6 pt-4 shrink-0 transition-colors duration-500 ${
+          isDarkMode ? "bg-gradient-to-t from-surface via-surface/90 to-transparent" : "bg-gradient-to-t from-white via-white/95 to-transparent"
+        }`}>
           <form onSubmit={handleSend} className="relative flex items-end w-full max-w-4xl mx-auto">
             <textarea
               value={input}
@@ -1108,17 +1233,23 @@ export default function ChatScreen({ user, onLogout }) {
               placeholder={pendingApprovalId ? "Waiting for HR Action..." : "Type a message..."}
               rows={1}
               style={{ minHeight: "52px" }}
-              className="w-full bg-black/40 border border-white/10 rounded-2xl py-3 pl-4 pr-14 text-white placeholder-on-surface-variant/50 resize-none max-h-32 focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary focus:bg-black/60 transition-all duration-300"
+              className={`w-full border rounded-2xl py-3 pl-4 pr-24 resize-none max-h-32 focus:outline-none transition-all duration-300 ${
+                isDarkMode 
+                  ? "bg-black/40 border-white/10 text-white placeholder:text-slate-400 focus:ring-sky-500 focus:bg-black/60" 
+                  : "bg-white border-slate-300 text-slate-900 placeholder:text-slate-500 font-semibold shadow-md focus:ring-sky-600 focus:border-sky-500"
+              }`}
             />
             <button 
               type="button"
               onClick={handleVoiceInput}
               disabled={isLoading || !!pendingApprovalId}
               title="Voice Input (Speech-to-Text)"
-              className={`absolute right-14 bottom-2 w-10 h-10 rounded-xl border transition-all flex items-center justify-center ${
+              className={`absolute right-14 bottom-2.5 w-9 h-9 rounded-xl border transition-all flex items-center justify-center ${
                 isListening 
-                  ? "bg-red-500/20 text-red-400 border-red-500/40 animate-pulse" 
-                  : "bg-white/5 text-on-surface-variant border-white/10 hover:bg-white/10 hover:text-white"
+                  ? "bg-red-500/20 text-red-500 border-red-500/40 animate-pulse" 
+                  : isDarkMode
+                  ? "bg-white/5 text-slate-300 border-white/10 hover:bg-white/10 hover:text-white"
+                  : "bg-slate-100 text-slate-700 border-slate-300 hover:bg-slate-200 shadow-sm"
               }`}
             >
               <Mic className="w-4 h-4" />
@@ -1126,7 +1257,7 @@ export default function ChatScreen({ user, onLogout }) {
             <button 
               type="submit"
               disabled={isLoading || !!pendingApprovalId || !input.trim()}
-              className="absolute right-2 bottom-2 w-10 h-10 rounded-xl bg-primary-container text-white hover:bg-primary hover:text-on-primary transition-colors flex items-center justify-center shadow-[0_0_10px_rgba(91,107,160,0.4)] hover:shadow-[0_0_15px_rgba(219,225,255,0.6)] active:scale-95 group disabled:opacity-40 disabled:pointer-events-none"
+              className="absolute right-2.5 bottom-2.5 w-9 h-9 rounded-xl bg-sky-600 text-white hover:bg-sky-500 transition-colors flex items-center justify-center shadow-md active:scale-95 group disabled:opacity-40 disabled:pointer-events-none"
             >
               <Send className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
             </button>
