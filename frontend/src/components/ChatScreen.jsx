@@ -19,7 +19,12 @@ import {
   UserCheck,
   ShieldCheck,
   Award,
-  Sparkles
+  Sparkles,
+  Sun,
+  Moon,
+  Trash2,
+  Download,
+  Headphones
 } from "lucide-react";
 
 const LeaveRequestWidget = ({ onSubmit, disabled }) => {
@@ -350,6 +355,26 @@ export default function ChatScreen({ user, onLogout }) {
   const [isListening, setIsListening] = useState(false);
   const [persona, setPersona] = useState("professional");
   const [language, setLanguage] = useState("en");
+  const [isDarkMode, setIsDarkMode] = useState(true);
+  const [showMenu, setShowMenu] = useState(false);
+
+  const handleClearChat = () => {
+    setMessages([
+      { sender: "knowledge_rag", content: "Hello! I'm OnboardBot, your virtual HR assistant. How can I help you settle in today?" }
+    ]);
+    setShowMenu(false);
+  };
+
+  const handleDownloadSummary = () => {
+    const text = messages.map(m => `[${m.sender.toUpperCase()}]: ${m.content}`).join("\n\n");
+    const blob = new Blob([text], { type: "text/plain" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "Onboarding_Chat_Summary.txt";
+    a.click();
+    setShowMenu(false);
+  };
 
   const [onboardingTasks, setOnboardingTasks] = useState({
     login: true,
@@ -582,7 +607,7 @@ export default function ChatScreen({ user, onLogout }) {
   };
 
   return (
-    <div className="mesh-bg flex h-screen w-full relative z-10 p-4 gap-4 max-w-[1600px] mx-auto overflow-hidden">
+    <div className={`flex h-screen w-full relative z-10 p-4 gap-4 max-w-[1600px] mx-auto overflow-hidden transition-colors duration-500 ${isDarkMode ? "mesh-bg" : "bg-slate-100 text-slate-900 font-sans"}`}>
       
       {/* Left Sidebar (Glass Panel) */}
       <aside className="hidden md:flex flex-col w-[25%] max-w-[320px] glass-panel rounded-xl shadow-2xl relative overflow-hidden p-6">
@@ -742,13 +767,81 @@ export default function ChatScreen({ user, onLogout }) {
                 <option value="de" className="bg-slate-900 text-white">Deutsch (DE)</option>
               </select>
             </div>
-            {/* Mobile search button */}
-            <button className="sm:hidden p-2 rounded-full hover:bg-white/10 text-on-surface-variant transition-colors">
-              <Search className="w-5 h-5" />
+            {/* Light / Dark Mode Toggle */}
+            <button 
+              onClick={() => setIsDarkMode(!isDarkMode)}
+              title={isDarkMode ? "Switch to Light Mode" : "Switch to Dark Mode"}
+              className="p-2 rounded-full hover:bg-white/10 text-on-surface-variant transition-colors"
+            >
+              {isDarkMode ? <Sun className="w-4 h-4 text-yellow-400" /> : <Moon className="w-4 h-4 text-secondary" />}
             </button>
-            <button className="p-2 rounded-full hover:bg-white/10 text-on-surface-variant transition-colors">
-              <MoreVertical className="w-5 h-5" />
+
+            {/* Header Sign Out Button */}
+            <button 
+              onClick={onLogout} 
+              title="Sign Out to switch account" 
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-red-500/10 border border-red-500/20 hover:bg-red-500/20 text-xs font-semibold text-red-300 transition-all cursor-pointer shrink-0"
+            >
+              <LogOut className="w-3.5 h-3.5" /> 
+              <span>Sign Out</span>
             </button>
+
+            {/* Functional Three Dots Menu Button */}
+            <div className="relative">
+              <button 
+                onClick={() => setShowMenu(!showMenu)}
+                className="p-2 rounded-full hover:bg-white/10 text-on-surface-variant transition-colors"
+              >
+                <MoreVertical className="w-5 h-5" />
+              </button>
+
+              {/* Three Dots Dropdown Menu */}
+              {showMenu && (
+                <div className="absolute right-0 mt-2 w-56 glass-panel bg-slate-900/95 border border-white/15 rounded-xl shadow-2xl py-2 z-50 animate-fade-in-up text-left">
+                  <button 
+                    onClick={() => { setIsDarkMode(!isDarkMode); setShowMenu(false); }}
+                    className="w-full px-4 py-2 text-xs text-on-surface hover:bg-white/10 flex items-center gap-2.5 transition-colors"
+                  >
+                    {isDarkMode ? <Sun className="w-4 h-4 text-yellow-400" /> : <Moon className="w-4 h-4 text-secondary" />}
+                    <span>{isDarkMode ? "Switch to Light Mode" : "Switch to Dark Mode"}</span>
+                  </button>
+
+                  <button 
+                    onClick={handleClearChat}
+                    className="w-full px-4 py-2 text-xs text-on-surface hover:bg-white/10 flex items-center gap-2.5 transition-colors"
+                  >
+                    <Trash2 className="w-4 h-4 text-primary" />
+                    <span>Clear Chat History</span>
+                  </button>
+
+                  <button 
+                    onClick={handleDownloadSummary}
+                    className="w-full px-4 py-2 text-xs text-on-surface hover:bg-white/10 flex items-center gap-2.5 transition-colors"
+                  >
+                    <Download className="w-4 h-4 text-secondary" />
+                    <span>Export Chat Log</span>
+                  </button>
+
+                  <button 
+                    onClick={() => { setMessages(prev => [...prev, { sender: "knowledge_rag", content: "WIDGET:PEER_MENTOR" }]); setShowMenu(false); }}
+                    className="w-full px-4 py-2 text-xs text-on-surface hover:bg-white/10 flex items-center gap-2.5 transition-colors"
+                  >
+                    <Headphones className="w-4 h-4 text-tertiary" />
+                    <span>HR Support Hotdesk</span>
+                  </button>
+
+                  <div className="my-1 border-t border-white/10"></div>
+
+                  <button 
+                    onClick={onLogout}
+                    className="w-full px-4 py-2 text-xs text-red-300 hover:bg-red-500/10 flex items-center gap-2.5 transition-colors font-semibold"
+                  >
+                    <LogOut className="w-4 h-4" />
+                    <span>Sign Out</span>
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
         </header>
 
