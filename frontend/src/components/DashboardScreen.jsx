@@ -426,6 +426,53 @@ export default function DashboardScreen({ user, onLogout }) {
 
         {/* Inner Content Area */}
         <div className="flex-1 overflow-y-auto p-6 chat-scroll flex flex-col">
+          {/* Executive KPI Stat Cards Grid */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6 text-left">
+            <div className="glass-card-hover bg-black/30 border border-white/10 rounded-2xl p-4 flex items-center justify-between shadow-lg">
+              <div>
+                <span className="text-[10px] font-mono uppercase tracking-wider text-on-surface-variant block">Total Employees</span>
+                <span className="text-2xl font-bold text-white font-mono mt-0.5 block">{employees.length || 12}</span>
+                <span className="text-[10px] text-green-400 font-mono mt-1 block">Active Workspace</span>
+              </div>
+              <div className="p-3 rounded-xl bg-primary/20 text-primary border border-primary/30">
+                <User className="w-5 h-5" />
+              </div>
+            </div>
+
+            <div className="glass-card-hover bg-black/30 border border-white/10 rounded-2xl p-4 flex items-center justify-between shadow-lg">
+              <div>
+                <span className="text-[10px] font-mono uppercase tracking-wider text-on-surface-variant block">Pending Approvals</span>
+                <span className="text-2xl font-bold text-yellow-400 font-mono mt-0.5 block">{approvals.length}</span>
+                <span className="text-[10px] text-yellow-300 font-mono mt-1 block">Requires HR Action</span>
+              </div>
+              <div className="p-3 rounded-xl bg-yellow-500/20 text-yellow-400 border border-yellow-500/30">
+                <ShieldCheck className="w-5 h-5" />
+              </div>
+            </div>
+
+            <div className="glass-card-hover bg-black/30 border border-white/10 rounded-2xl p-4 flex items-center justify-between shadow-lg">
+              <div>
+                <span className="text-[10px] font-mono uppercase tracking-wider text-on-surface-variant block">Hardware Orders</span>
+                <span className="text-2xl font-bold text-blue-400 font-mono mt-0.5 block">{hardwareTickets.length || 4}</span>
+                <span className="text-[10px] text-blue-300 font-mono mt-1 block">Workstation Allocations</span>
+              </div>
+              <div className="p-3 rounded-xl bg-blue-500/20 text-blue-400 border border-blue-500/30">
+                <HardDrive className="w-5 h-5" />
+              </div>
+            </div>
+
+            <div className="glass-card-hover bg-black/30 border border-white/10 rounded-2xl p-4 flex items-center justify-between shadow-lg">
+              <div>
+                <span className="text-[10px] font-mono uppercase tracking-wider text-on-surface-variant block">Handbook Gaps</span>
+                <span className="text-2xl font-bold text-secondary font-mono mt-0.5 block">{insights.length || 2}</span>
+                <span className="text-[10px] text-secondary font-mono mt-1 block">Policy Insights Logged</span>
+              </div>
+              <div className="p-3 rounded-xl bg-secondary/20 text-secondary border border-secondary/30">
+                <Lightbulb className="w-5 h-5" />
+              </div>
+            </div>
+          </div>
+
           {/* Sub-header */}
           <div className="flex items-center justify-between mb-8 border-b border-white/10 pb-6 flex-wrap gap-4 text-left">
             <div className="flex items-center gap-4">

@@ -627,90 +627,132 @@ export default function ChatScreen({ user, onLogout }) {
           </div>
         </div>
 
-        {/* Onboarding Progress Tracker */}
-        <div className="pt-6 border-b border-white/10 pb-6 text-left">
-          <div className="flex justify-between items-center mb-2">
-            <h3 className="text-[11px] font-mono tracking-widest text-secondary uppercase">Your Onboarding</h3>
-            <span className="text-xs font-bold text-secondary font-mono">{calculateProgress()}%</span>
+        {/* Onboarding Progress Gauge */}
+        <div className="pt-5 border-b border-white/10 pb-5 text-left flex flex-col gap-3">
+          <div className="flex justify-between items-center">
+            <h3 className="text-[11px] font-mono tracking-widest text-secondary uppercase font-bold">Onboarding Completion</h3>
+            <span className="text-xs font-bold text-secondary font-mono px-2 py-0.5 rounded bg-secondary/10 border border-secondary/20 glow-badge-success">{calculateProgress()}%</span>
           </div>
-          <div className="w-full bg-black/40 h-2 rounded-full overflow-hidden mb-4 border border-white/5">
-            <div className="bg-gradient-to-r from-secondary to-primary h-full transition-all duration-500" style={{ width: `${calculateProgress()}%` }}></div>
+
+          <div className="flex items-center gap-4 bg-black/30 p-3 rounded-xl border border-white/10 shadow-inner">
+            {/* SVG Circular Progress Ring */}
+            <div className="relative w-14 h-14 shrink-0 flex items-center justify-center">
+              <svg className="w-full h-full transform -rotate-90" viewBox="0 0 36 36">
+                <path
+                  className="text-white/10"
+                  strokeWidth="3.5"
+                  stroke="currentColor"
+                  fill="none"
+                  d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                />
+                <path
+                  className="text-primary transition-all duration-700 ease-out"
+                  strokeDasharray={`${calculateProgress()}, 100`}
+                  strokeWidth="3.5"
+                  strokeLinecap="round"
+                  stroke="currentColor"
+                  fill="none"
+                  d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                />
+              </svg>
+              <span className="absolute text-[11px] font-mono font-bold text-white">{calculateProgress()}%</span>
+            </div>
+
+            <div className="flex flex-col gap-1 overflow-hidden">
+              <span className="text-xs font-semibold text-white truncate">Milestone Tracker</span>
+              <span className="text-[10px] text-on-surface-variant font-mono">
+                {Object.values(onboardingTasks).filter(v => v).length} of {Object.keys(onboardingTasks).length} tasks completed
+              </span>
+            </div>
           </div>
-          <ul className="flex flex-col gap-2 text-xs">
+
+          <ul className="flex flex-col gap-1.5 text-xs pt-1">
             <li className="flex items-center gap-2 text-on-surface-variant">
-              <input type="checkbox" checked={onboardingTasks.login} readOnly className="rounded border-white/20 bg-black/20 text-primary focus:ring-0 w-3.5 h-3.5"/>
-              <span className={onboardingTasks.login ? "line-through opacity-60" : ""}>Register & Join Workspace</span>
+              <ShieldCheck className={`w-3.5 h-3.5 ${onboardingTasks.login ? "text-green-400" : "text-white/20"}`} />
+              <span className={onboardingTasks.login ? "line-through opacity-60" : "text-white/80"}>Workspace Registration</span>
             </li>
             <li className="flex items-center gap-2 text-on-surface-variant">
-              <input type="checkbox" checked={onboardingTasks.policy} readOnly className="rounded border-white/20 bg-black/20 text-primary focus:ring-0 w-3.5 h-3.5"/>
-              <span className={onboardingTasks.policy ? "line-through opacity-60" : ""}>Ask a Policy Question</span>
+              <ShieldCheck className={`w-3.5 h-3.5 ${onboardingTasks.policy ? "text-green-400" : "text-white/20"}`} />
+              <span className={onboardingTasks.policy ? "line-through opacity-60" : "text-white/80"}>Ask Policy Question</span>
             </li>
             <li className="flex items-center gap-2 text-on-surface-variant">
-              <input type="checkbox" checked={onboardingTasks.leave} readOnly className="rounded border-white/20 bg-black/20 text-primary focus:ring-0 w-3.5 h-3.5"/>
-              <span className={onboardingTasks.leave ? "line-through opacity-60" : ""}>Request Leave (Interactive)</span>
+              <ShieldCheck className={`w-3.5 h-3.5 ${onboardingTasks.leave ? "text-green-400" : "text-white/20"}`} />
+              <span className={onboardingTasks.leave ? "line-through opacity-60" : "text-white/80"}>Leave Request</span>
             </li>
             <li className="flex items-center gap-2 text-on-surface-variant">
-              <input type="checkbox" checked={onboardingTasks.it} readOnly className="rounded border-white/20 bg-black/20 text-primary focus:ring-0 w-3.5 h-3.5"/>
-              <span className={onboardingTasks.it ? "line-through opacity-60" : ""}>Provision Software Accounts</span>
+              <ShieldCheck className={`w-3.5 h-3.5 ${onboardingTasks.it ? "text-green-400" : "text-white/20"}`} />
+              <span className={onboardingTasks.it ? "line-through opacity-60" : "text-white/80"}>IT Provisioning</span>
             </li>
             <li className="flex items-center gap-2 text-on-surface-variant">
-              <input type="checkbox" checked={onboardingTasks.doc} readOnly className="rounded border-white/20 bg-black/20 text-primary focus:ring-0 w-3.5 h-3.5"/>
-              <span className={onboardingTasks.doc ? "line-through opacity-60" : ""}>Upload Onboarding Documents</span>
+              <ShieldCheck className={`w-3.5 h-3.5 ${onboardingTasks.doc ? "text-green-400" : "text-white/20"}`} />
+              <span className={onboardingTasks.doc ? "line-through opacity-60" : "text-white/80"}>Document Upload</span>
             </li>
           </ul>
         </div>
 
-        {/* Quick Actions */}
-        <div className="pt-6 flex-1 text-left">
-          <h3 className="text-[11px] font-mono tracking-widest text-tertiary mb-4 uppercase">Quick Actions</h3>
-          <nav className="flex flex-col gap-1">
+        {/* Quick Actions with 3D Card Hover */}
+        <div className="pt-4 flex-1 text-left">
+          <h3 className="text-[11px] font-mono tracking-widest text-tertiary mb-3 uppercase font-bold">Quick Actions</h3>
+          <nav className="flex flex-col gap-1.5">
             <button 
               onClick={() => sendMessage("I would like to request leave")}
               disabled={isLoading || !!pendingApprovalId}
-              className="flex items-center gap-3 p-3 rounded-lg text-on-surface hover:bg-white/5 transition-all duration-200 group w-full text-left disabled:opacity-50 disabled:pointer-events-none"
+              className="glass-card-hover flex items-center gap-3 p-2.5 rounded-xl bg-white/5 border border-white/10 text-on-surface hover:bg-white/10 transition-all duration-200 group w-full text-left disabled:opacity-50"
             >
-              <Calendar className="w-5 h-5 text-primary group-hover:scale-110 transition-transform" />
-              <span className="text-sm font-semibold">Request Leave</span>
+              <div className="p-1.5 rounded-lg bg-primary/20 text-primary group-hover:scale-110 transition-transform">
+                <Calendar className="w-4 h-4" />
+              </div>
+              <span className="text-xs font-semibold text-white">Request Leave</span>
             </button>
             <button 
               onClick={() => sendMessage("I need help setting up my software accounts")}
               disabled={isLoading || !!pendingApprovalId}
-              className="flex items-center gap-3 p-3 rounded-lg text-on-surface hover:bg-white/5 transition-all duration-200 group w-full text-left disabled:opacity-50 disabled:pointer-events-none"
+              className="glass-card-hover flex items-center gap-3 p-2.5 rounded-xl bg-white/5 border border-white/10 text-on-surface hover:bg-white/10 transition-all duration-200 group w-full text-left disabled:opacity-50"
             >
-              <LifeBuoy className="w-5 h-5 text-primary group-hover:scale-110 transition-transform" />
-              <span className="text-sm font-semibold">IT Help</span>
+              <div className="p-1.5 rounded-lg bg-secondary/20 text-secondary group-hover:scale-110 transition-transform">
+                <LifeBuoy className="w-4 h-4" />
+              </div>
+              <span className="text-xs font-semibold text-white">IT Help</span>
             </button>
             <button 
               onClick={() => setMessages(prev => [...prev, { sender: "knowledge_rag", content: "WIDGET:DOCUMENT_UPLOAD" }])}
               disabled={isLoading || !!pendingApprovalId}
-              className="flex items-center gap-3 p-3 rounded-lg text-on-surface hover:bg-white/5 transition-all duration-200 group w-full text-left disabled:opacity-50 disabled:pointer-events-none"
+              className="glass-card-hover flex items-center gap-3 p-2.5 rounded-xl bg-white/5 border border-white/10 text-on-surface hover:bg-white/10 transition-all duration-200 group w-full text-left disabled:opacity-50"
             >
-              <FileText className="w-5 h-5 text-primary group-hover:scale-110 transition-transform" />
-              <span className="text-sm font-semibold">Documents</span>
+              <div className="p-1.5 rounded-lg bg-tertiary/20 text-tertiary group-hover:scale-110 transition-transform">
+                <FileText className="w-4 h-4" />
+              </div>
+              <span className="text-xs font-semibold text-white">Documents</span>
             </button>
             <button 
               onClick={() => setMessages(prev => [...prev, { sender: "it_provisioner", content: "WIDGET:HARDWARE_ORDER" }])}
               disabled={isLoading || !!pendingApprovalId}
-              className="flex items-center gap-3 p-3 rounded-lg text-on-surface hover:bg-white/5 transition-all duration-200 group w-full text-left disabled:opacity-50 disabled:pointer-events-none"
+              className="glass-card-hover flex items-center gap-3 p-2.5 rounded-xl bg-white/5 border border-white/10 text-on-surface hover:bg-white/10 transition-all duration-200 group w-full text-left disabled:opacity-50"
             >
-              <Cpu className="w-5 h-5 text-primary group-hover:scale-110 transition-transform" />
-              <span className="text-sm font-semibold">Hardware Order</span>
+              <div className="p-1.5 rounded-lg bg-blue-500/20 text-blue-400 group-hover:scale-110 transition-transform">
+                <Cpu className="w-4 h-4" />
+              </div>
+              <span className="text-xs font-semibold text-white">Hardware Order</span>
             </button>
             <button 
               onClick={() => setMessages(prev => [...prev, { sender: "knowledge_rag", content: "WIDGET:E_SIGNATURE" }])}
               disabled={isLoading || !!pendingApprovalId}
-              className="flex items-center gap-3 p-3 rounded-lg text-on-surface hover:bg-white/5 transition-all duration-200 group w-full text-left disabled:opacity-50 disabled:pointer-events-none"
+              className="glass-card-hover flex items-center gap-3 p-2.5 rounded-xl bg-white/5 border border-white/10 text-on-surface hover:bg-white/10 transition-all duration-200 group w-full text-left disabled:opacity-50"
             >
-              <PenTool className="w-5 h-5 text-primary group-hover:scale-110 transition-transform" />
-              <span className="text-sm font-semibold">Sign Policy</span>
+              <div className="p-1.5 rounded-lg bg-purple-500/20 text-purple-400 group-hover:scale-110 transition-transform">
+                <PenTool className="w-4 h-4" />
+              </div>
+              <span className="text-xs font-semibold text-white">Sign Policy</span>
             </button>
             <button 
               onClick={() => setMessages(prev => [...prev, { sender: "knowledge_rag", content: "WIDGET:PEER_MENTOR" }])}
               disabled={isLoading || !!pendingApprovalId}
-              className="flex items-center gap-3 p-3 rounded-lg text-on-surface hover:bg-white/5 transition-all duration-200 group w-full text-left disabled:opacity-50 disabled:pointer-events-none"
+              className="glass-card-hover flex items-center gap-3 p-2.5 rounded-xl bg-white/5 border border-white/10 text-on-surface hover:bg-white/10 transition-all duration-200 group w-full text-left disabled:opacity-50"
             >
-              <UserCheck className="w-5 h-5 text-primary group-hover:scale-110 transition-transform" />
-              <span className="text-sm font-semibold">Peer Mentor</span>
+              <div className="p-1.5 rounded-lg bg-emerald-500/20 text-emerald-400 group-hover:scale-110 transition-transform">
+                <UserCheck className="w-4 h-4" />
+              </div>
+              <span className="text-xs font-semibold text-white">Peer Mentor</span>
             </button>
           </nav>
 
