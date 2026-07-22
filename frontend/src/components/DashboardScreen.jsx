@@ -12,7 +12,11 @@ import {
   Building, 
   Settings, 
   HelpCircle,
-  LogOut
+  LogOut,
+  Download,
+  LayoutGrid,
+  Lightbulb,
+  HardDrive
 } from "lucide-react";
 
 export default function DashboardScreen({ user, onLogout }) {
@@ -31,6 +35,9 @@ export default function DashboardScreen({ user, onLogout }) {
     hr_email: "",
     documents_required: ""
   });
+  const [kanban, setKanban] = useState({ not_started: [], in_progress: [], pending_review: [], fully_onboarded: [] });
+  const [hardwareTickets, setHardwareTickets] = useState([]);
+  const [insights, setInsights] = useState([]);
   const [showNewRequest, setShowNewRequest] = useState(false);
   const [newRequestForm, setNewRequestForm] = useState({ employee_id: "", action_type: "provisioning", req_details: "" });
 
@@ -167,6 +174,64 @@ export default function DashboardScreen({ user, onLogout }) {
     };
   }, []);
 
+  const fetchKanban = async () => {
+    setIsLoading(true);
+    try {
+      const response = await fetch("http://localhost:8000/api/v1/kanban");
+      if (!response.ok) throw new Error("Failed to load kanban");
+      const data = await response.json();
+      setKanban(data);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const fetchHardware = async () => {
+    setIsLoading(true);
+    try {
+      const response = await fetch("http://localhost:8000/api/v1/hardware");
+      if (!response.ok) throw new Error("Failed to load hardware tickets");
+      const data = await response.json();
+      setHardwareTickets(data);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const fetchInsights = async () => {
+    setIsLoading(true);
+    try {
+      const response = await fetch("http://localhost:8000/api/v1/insights");
+      if (!response.ok) throw new Error("Failed to load policy insights");
+      const data = await response.json();
+      setInsights(data);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleApproveHardware = async (ticketId, action) => {
+    try {
+      const response = await fetch("http://localhost:8000/api/v1/hardware/approve", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ticket_id: ticketId, action })
+      });
+      if (!response.ok) throw new Error("Failed to update hardware ticket");
+      addToast(`Hardware request ${action}`, "success");
+      fetchHardware();
+    } catch (err) {
+      console.error(err);
+      addToast("Failed to process hardware ticket", "error");
+    }
+  };
+
   useEffect(() => {
     if (activeTab === "employees") {
       fetchEmployees();
@@ -174,6 +239,12 @@ export default function DashboardScreen({ user, onLogout }) {
       fetchSettings();
     } else if (activeTab === "approvals") {
       fetchPendingApprovals();
+    } else if (activeTab === "kanban") {
+      fetchKanban();
+    } else if (activeTab === "hardware") {
+      fetchHardware();
+    } else if (activeTab === "insights") {
+      fetchInsights();
     }
   }, [activeTab]);
 
@@ -232,40 +303,76 @@ export default function DashboardScreen({ user, onLogout }) {
           New Request
         </button>
  
-        <nav className="flex flex-col gap-1 flex-grow text-left">
+        <nav className="flex flex-col gap-1 flex-grow text-left overflow-y-auto pr-1 chat-scroll">
           <button 
             onClick={() => setActiveTab("approvals")}
-            className={`flex items-center gap-3 px-4 py-3 rounded-lg text-xs font-mono uppercase tracking-wider transition-all border-l-4 w-full text-left ${
+            className={`flex items-center gap-3 px-4 py-2.5 rounded-lg text-xs font-mono uppercase tracking-wider transition-all border-l-4 w-full text-left ${
               activeTab === "approvals" || activeTab === "history" 
                 ? "bg-primary-container/35 text-primary border-l-primary" 
                 : "text-on-surface-variant opacity-80 hover:bg-white/5 hover:opacity-100 border-l-transparent"
             }`}
           >
-            <ShieldCheck className="w-5 h-5" />
+            <ShieldCheck className="w-4 h-4" />
             Approvals
+          </button>
+
+          <button 
+            onClick={() => setActiveTab("kanban")}
+            className={`flex items-center gap-3 px-4 py-2.5 rounded-lg text-xs font-mono uppercase tracking-wider transition-all border-l-4 w-full text-left ${
+              activeTab === "kanban" 
+                ? "bg-primary-container/35 text-primary border-l-primary" 
+                : "text-on-surface-variant opacity-80 hover:bg-white/5 hover:opacity-100 border-l-transparent"
+            }`}
+          >
+            <LayoutGrid className="w-4 h-4" />
+            Kanban Pipeline
+          </button>
+
+          <button 
+            onClick={() => setActiveTab("hardware")}
+            className={`flex items-center gap-3 px-4 py-2.5 rounded-lg text-xs font-mono uppercase tracking-wider transition-all border-l-4 w-full text-left ${
+              activeTab === "hardware" 
+                ? "bg-primary-container/35 text-primary border-l-primary" 
+                : "text-on-surface-variant opacity-80 hover:bg-white/5 hover:opacity-100 border-l-transparent"
+            }`}
+          >
+            <HardDrive className="w-4 h-4" />
+            Hardware Orders
+          </button>
+
+          <button 
+            onClick={() => setActiveTab("insights")}
+            className={`flex items-center gap-3 px-4 py-2.5 rounded-lg text-xs font-mono uppercase tracking-wider transition-all border-l-4 w-full text-left ${
+              activeTab === "insights" 
+                ? "bg-primary-container/35 text-primary border-l-primary" 
+                : "text-on-surface-variant opacity-80 hover:bg-white/5 hover:opacity-100 border-l-transparent"
+            }`}
+          >
+            <Lightbulb className="w-4 h-4" />
+            Policy Insights
           </button>
           
           <button 
             onClick={() => setActiveTab("employees")}
-            className={`flex items-center gap-3 px-4 py-3 rounded-lg text-xs font-mono uppercase tracking-wider transition-all border-l-4 w-full text-left ${
+            className={`flex items-center gap-3 px-4 py-2.5 rounded-lg text-xs font-mono uppercase tracking-wider transition-all border-l-4 w-full text-left ${
               activeTab === "employees" 
                 ? "bg-primary-container/35 text-primary border-l-primary" 
                 : "text-on-surface-variant opacity-80 hover:bg-white/5 hover:opacity-100 border-l-transparent"
             }`}
           >
-            <Briefcase className="w-5 h-5" />
-            Employee Details
+            <Briefcase className="w-4 h-4" />
+            Employee Directory
           </button>
           
           <button 
             onClick={() => setActiveTab("company")}
-            className={`flex items-center gap-3 px-4 py-3 rounded-lg text-xs font-mono uppercase tracking-wider transition-all border-l-4 w-full text-left ${
+            className={`flex items-center gap-3 px-4 py-2.5 rounded-lg text-xs font-mono uppercase tracking-wider transition-all border-l-4 w-full text-left ${
               activeTab === "company" 
                 ? "bg-primary-container/35 text-primary border-l-primary" 
                 : "text-on-surface-variant opacity-80 hover:bg-white/5 hover:opacity-100 border-l-transparent"
             }`}
           >
-            <Building className="w-5 h-5" />
+            <Building className="w-4 h-4" />
             Company Details
           </button>
         </nav>
@@ -282,10 +389,6 @@ export default function DashboardScreen({ user, onLogout }) {
             <Settings className="w-4 h-4" />
             Settings
           </button>
-          <a className="flex items-center gap-3 px-4 py-2 rounded-lg text-on-surface-variant opacity-80 hover:bg-white/5 hover:opacity-100 text-xs font-mono uppercase tracking-wider transition-all border-l-4 border-transparent" href="#">
-            <HelpCircle className="w-4 h-4" />
-            Help
-          </a>
         </div>
       </aside>
 
@@ -294,9 +397,18 @@ export default function DashboardScreen({ user, onLogout }) {
         {/* TopNavBar */}
         <nav className="h-16 flex justify-between items-center px-6 bg-black/20 backdrop-blur-xl border-b border-white/10 shrink-0">
           <div className="flex items-center gap-4">
-            <span className="font-bold text-lg text-primary cursor-pointer hover:text-primary transition-colors">OnboardBot v2</span>
+            <span className="font-bold text-lg text-primary cursor-pointer hover:text-primary transition-colors">OnboardBot Enterprise</span>
           </div>
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-3">
+            <a 
+              href="http://localhost:8000/api/v1/export/audit-csv" 
+              target="_blank" 
+              rel="noreferrer"
+              className="text-xs font-semibold px-3 py-1.5 bg-primary/20 hover:bg-primary/30 border border-primary/30 text-primary rounded-lg transition-all flex items-center gap-1.5"
+            >
+              <Download className="w-3.5 h-3.5" />
+              Export Audit CSV
+            </a>
             <img 
               alt="HR Admin Profile" 
               className="w-9 h-9 rounded-full border border-white/20 shadow-lg object-cover" 
@@ -454,6 +566,129 @@ export default function DashboardScreen({ user, onLogout }) {
                 ))}
               </div>
             )
+          ) : activeTab === "kanban" ? (
+            <div className="flex flex-col gap-4 text-left">
+              <h2 className="text-xl font-bold text-white flex items-center gap-2"><LayoutGrid className="w-5 h-5 text-primary"/> Onboarding Kanban Pipeline</h2>
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                {/* Not Started */}
+                <div className="bg-black/30 border border-white/10 rounded-2xl p-4 flex flex-col gap-3">
+                  <div className="flex justify-between items-center pb-2 border-b border-white/10">
+                    <span className="text-xs font-mono font-bold text-on-surface-variant uppercase">Not Started</span>
+                    <span className="bg-white/10 text-white text-[10px] px-2 py-0.5 rounded font-mono font-bold">{kanban.not_started.length}</span>
+                  </div>
+                  {kanban.not_started.map(emp => (
+                    <div key={emp.id} className="bg-black/40 border border-white/10 rounded-xl p-3 flex flex-col gap-1">
+                      <span className="text-xs font-bold text-white">{emp.name}</span>
+                      <span className="text-[10px] font-mono text-on-surface-variant">{emp.department} • {emp.email}</span>
+                      <span className="text-[10px] font-mono text-secondary mt-1">Progress: {emp.progress_pct}</span>
+                    </div>
+                  ))}
+                </div>
+
+                {/* In Progress */}
+                <div className="bg-black/30 border border-primary/20 rounded-2xl p-4 flex flex-col gap-3">
+                  <div className="flex justify-between items-center pb-2 border-b border-white/10">
+                    <span className="text-xs font-mono font-bold text-primary uppercase">In Progress</span>
+                    <span className="bg-primary/20 text-primary text-[10px] px-2 py-0.5 rounded font-mono font-bold">{kanban.in_progress.length}</span>
+                  </div>
+                  {kanban.in_progress.map(emp => (
+                    <div key={emp.id} className="bg-black/40 border border-primary/20 rounded-xl p-3 flex flex-col gap-1">
+                      <span className="text-xs font-bold text-white">{emp.name}</span>
+                      <span className="text-[10px] font-mono text-on-surface-variant">{emp.department} • {emp.email}</span>
+                      <span className="text-[10px] font-mono text-primary mt-1">Progress: {emp.progress_pct}</span>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Pending Review */}
+                <div className="bg-black/30 border border-yellow-500/30 rounded-2xl p-4 flex flex-col gap-3">
+                  <div className="flex justify-between items-center pb-2 border-b border-white/10">
+                    <span className="text-xs font-mono font-bold text-yellow-400 uppercase">Pending HR Action</span>
+                    <span className="bg-yellow-500/20 text-yellow-300 text-[10px] px-2 py-0.5 rounded font-mono font-bold">{kanban.pending_review.length}</span>
+                  </div>
+                  {kanban.pending_review.map(emp => (
+                    <div key={emp.id} className="bg-black/40 border border-yellow-500/20 rounded-xl p-3 flex flex-col gap-1">
+                      <span className="text-xs font-bold text-white">{emp.name}</span>
+                      <span className="text-[10px] font-mono text-on-surface-variant">{emp.department} • {emp.email}</span>
+                      <span className="text-[10px] font-mono text-yellow-400 mt-1">Action Needed</span>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Fully Onboarded */}
+                <div className="bg-black/30 border border-secondary/30 rounded-2xl p-4 flex flex-col gap-3">
+                  <div className="flex justify-between items-center pb-2 border-b border-white/10">
+                    <span className="text-xs font-mono font-bold text-secondary uppercase">Fully Onboarded</span>
+                    <span className="bg-secondary/20 text-secondary text-[10px] px-2 py-0.5 rounded font-mono font-bold">{kanban.fully_onboarded.length}</span>
+                  </div>
+                  {kanban.fully_onboarded.map(emp => (
+                    <div key={emp.id} className="bg-black/40 border border-secondary/20 rounded-xl p-3 flex flex-col gap-1">
+                      <span className="text-xs font-bold text-white">{emp.name}</span>
+                      <span className="text-[10px] font-mono text-on-surface-variant">{emp.department} • {emp.email}</span>
+                      <span className="text-[10px] font-mono text-secondary mt-1">100% Completed</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          ) : activeTab === "hardware" ? (
+            <div className="glass-panel rounded-2xl p-6 border border-white/10 text-left">
+              <h2 className="text-xl font-bold text-white mb-4 flex items-center gap-2"><HardDrive className="w-5 h-5 text-primary"/> Hardware Workstation Orders</h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {hardwareTickets.length === 0 ? (
+                  <p className="text-sm text-on-surface-variant">No hardware procurement orders found.</p>
+                ) : (
+                  hardwareTickets.map(t => (
+                    <div key={t.id} className="bg-black/30 border border-white/10 rounded-2xl p-5 flex flex-col gap-3">
+                      <div className="flex justify-between items-start">
+                        <div>
+                          <h3 className="font-bold text-white text-sm">{t.employee_name}</h3>
+                          <span className="text-[10px] font-mono text-on-surface-variant block">{t.department}</span>
+                        </div>
+                        <span className={`px-2 py-0.5 rounded text-[10px] font-mono font-bold uppercase ${
+                          t.status === "approved" ? "bg-green-500/20 text-green-400 border border-green-500/30" :
+                          t.status === "rejected" ? "bg-red-500/20 text-red-400 border border-red-500/30" :
+                          "bg-yellow-500/20 text-yellow-300 border border-yellow-500/30"
+                        }`}>
+                          {t.status}
+                        </span>
+                      </div>
+                      <div className="bg-black/40 rounded-xl p-3 border border-white/5 text-xs space-y-1">
+                        <p><span className="text-primary font-mono">Laptop:</span> {t.laptop_choice}</p>
+                        <p><span className="text-primary font-mono">Monitors:</span> {t.monitors}</p>
+                        <p><span className="text-primary font-mono">Peripherals:</span> {t.peripherals}</p>
+                      </div>
+                      {t.status === "pending" && (
+                        <div className="flex gap-2 pt-2 border-t border-white/10">
+                          <button onClick={() => handleApproveHardware(t.id, "rejected")} className="flex-1 bg-white/5 hover:bg-red-500/10 text-xs py-2 rounded-lg font-semibold text-red-300 border border-white/10">Reject</button>
+                          <button onClick={() => handleApproveHardware(t.id, "approved")} className="flex-1 bg-[#2563eb] text-xs py-2 rounded-lg font-semibold text-white">Approve</button>
+                        </div>
+                      )}
+                    </div>
+                  ))
+                )}
+              </div>
+            </div>
+          ) : activeTab === "insights" ? (
+            <div className="glass-panel rounded-2xl p-6 border border-white/10 text-left">
+              <h2 className="text-xl font-bold text-white mb-4 flex items-center gap-2"><Lightbulb className="w-5 h-5 text-primary"/> Policy Insights & Low Confidence Queries</h2>
+              <p className="text-xs text-on-surface-variant mb-4">Track queries asked by employees to identify documentation gaps in company handbook:</p>
+              <div className="flex flex-col gap-3">
+                {insights.length === 0 ? (
+                  <p className="text-sm text-on-surface-variant">No unhandled policy queries logged.</p>
+                ) : (
+                  insights.map(item => (
+                    <div key={item.id} className="bg-black/30 border border-white/10 rounded-xl p-4 flex justify-between items-center">
+                      <div>
+                        <p className="text-sm font-semibold text-white">"{item.query_text}"</p>
+                        <span className="text-[10px] font-mono text-on-surface-variant block mt-1">Logged At: {item.created_at}</span>
+                      </div>
+                      <span className="px-2.5 py-1 rounded bg-primary/20 border border-primary/30 text-primary text-xs font-mono">Open Review</span>
+                    </div>
+                  ))
+                )}
+              </div>
+            </div>
           ) : activeTab === "employees" ? (
             <div className="glass-panel rounded-2xl p-6 border border-white/10 text-left">
               <h2 className="text-xl font-bold text-white mb-4">Employee Directory</h2>

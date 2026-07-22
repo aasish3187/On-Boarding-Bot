@@ -28,3 +28,29 @@ class ChatMessage(Base):
     sender = Column(String, nullable=False)  # "user" or "knowledge_rag"
     content = Column(String, nullable=False)
     created_at = Column(DateTime, default=datetime.utcnow)
+
+class HardwareTicket(Base):
+    __tablename__ = "hardware_tickets"
+    id = Column(String, primary_key=True, index=True)
+    employee_id = Column(String, ForeignKey("users.id"))
+    laptop_choice = Column(String, nullable=False)
+    monitors = Column(String, nullable=False)
+    peripherals = Column(String, nullable=False)
+    status = Column(String, default="pending")
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+class PolicyQueryInsight(Base):
+    __tablename__ = "policy_query_insights"
+    id = Column(String, primary_key=True, index=True)
+    employee_id = Column(String, ForeignKey("users.id"), nullable=True)
+    query_text = Column(String, nullable=False)
+    status = Column(String, default="open")  # "open" or "resolved"
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+class UserProgress(Base):
+    __tablename__ = "user_progress"
+    user_id = Column(String, primary_key=True, index=True)
+    tasks_json = Column(JSON, nullable=False)
+    progress_pct = Column(String, default="20%")
+    updated_at = Column(DateTime, default=datetime.utcnow)
+

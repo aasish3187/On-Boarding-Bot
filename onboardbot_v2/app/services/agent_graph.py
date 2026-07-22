@@ -36,9 +36,9 @@ class RoutingDecision(BaseModel):
 
 def supervisor_router(state: OnboardState) -> Dict[str, Any]:
     last_msg = state["messages"][-1]["content"]
-    if last_msg.startswith("ACTION:SUBMIT_LEAVE|"):
+    if last_msg.startswith("ACTION:SUBMIT_LEAVE|") or last_msg.startswith("ACTION:SUBMIT_DOC|") or last_msg.startswith("ACTION:SUBMIT_SIGNATURE|"):
         return {"next_node": "knowledge_rag"}
-    if last_msg.startswith("ACTION:SUBMIT_IT|"):
+    if last_msg.startswith("ACTION:SUBMIT_IT|") or last_msg.startswith("ACTION:SUBMIT_HARDWARE|"):
         return {"next_node": "it_provisioner"}
         
     try:
@@ -133,6 +133,17 @@ def it_provisioner_node(state: OnboardState) -> Dict[str, Any]:
             }
         except Exception as e:
             print(f"[IT Form Parse Error] {e}")
+
+    if query.startswith("ACTION:SUBMIT_HARDWARE|"):
+        try:
+            return {
+                "messages": state["messages"] + [{"sender": "it_provisioner", "content": "Your hardware equipment request has been logged and sent to HR/IT Procurement for processing."}],
+                "risk_flag": True,
+                "provisioning_payload": {"req": query.replace("ACTION:SUBMIT_HARDWARE|", "Hardware Order: ")},
+                "next_node": "compliance_auditor"
+            }
+        except Exception as e:
+            print(f"[Hardware Parse Error] {e}")
 
     # 1. Trigger the form widget
     return {

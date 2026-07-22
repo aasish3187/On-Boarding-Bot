@@ -11,7 +11,15 @@ import {
   LogOut,
   Bot,
   CheckCircle2,
-  XCircle
+  XCircle,
+  Cpu,
+  PenTool,
+  Mic,
+  Volume2,
+  UserCheck,
+  ShieldCheck,
+  Award,
+  Sparkles
 } from "lucide-react";
 
 const LeaveRequestWidget = ({ onSubmit, disabled }) => {
@@ -178,6 +186,158 @@ const DocumentUploadWidget = ({ onUpload, disabled }) => {
   );
 };
 
+const HardwareProcurementWidget = ({ onSubmit, disabled }) => {
+  const [laptop, setLaptop] = useState("MacBook Pro M3 Max (32GB)");
+  const [monitors, setMonitors] = useState("Dual 27-inch 4K Displays");
+  const [peripherals, setPeripherals] = useState("Ergonomic Keyboard & Precision Mouse");
+  const [submitted, setSubmitted] = useState(false);
+
+  const handleSubmit = () => {
+    setSubmitted(true);
+    onSubmit(`ACTION:SUBMIT_HARDWARE|Laptop:${laptop}|Monitors:${monitors}|Peripherals:${peripherals}`);
+  };
+
+  return (
+    <div className="bg-black/40 border border-primary/30 rounded-2xl p-5 shadow-lg w-full min-w-[300px] max-w-sm flex flex-col gap-4 animate-fade-in-up">
+      <h3 className="text-primary font-bold flex items-center gap-2 text-sm"><Cpu className="w-4 h-4"/> Hardware Workstation Order</h3>
+      {submitted ? (
+        <div className="flex flex-col items-center gap-2 text-center py-4">
+          <CheckCircle2 className="w-10 h-10 text-secondary" />
+          <p className="text-sm font-semibold text-white">Order Submitted for Approval</p>
+          <p className="text-xs text-on-surface-variant font-mono">{laptop}</p>
+        </div>
+      ) : (
+        <>
+          <div className="flex flex-col gap-1.5 text-left">
+            <label className="text-[10px] font-mono uppercase text-on-surface-variant">Laptop Model</label>
+            <select value={laptop} onChange={e => setLaptop(e.target.value)} disabled={disabled} className="bg-black/30 border border-white/10 rounded-lg p-2 text-xs text-white focus:outline-none focus:border-primary">
+              <option value="MacBook Pro M3 Max (32GB)" className="text-black">MacBook Pro M3 Max (32GB)</option>
+              <option value="Dell XPS 15 Touch (64GB)" className="text-black">Dell XPS 15 Touch (64GB)</option>
+              <option value="Lenovo ThinkPad X1 Carbon" className="text-black">Lenovo ThinkPad X1 Carbon</option>
+            </select>
+          </div>
+
+          <div className="flex flex-col gap-1.5 text-left">
+            <label className="text-[10px] font-mono uppercase text-on-surface-variant">Display Options</label>
+            <select value={monitors} onChange={e => setMonitors(e.target.value)} disabled={disabled} className="bg-black/30 border border-white/10 rounded-lg p-2 text-xs text-white focus:outline-none focus:border-primary">
+              <option value="Dual 27-inch 4K Displays" className="text-black">Dual 27-inch 4K Displays</option>
+              <option value="34-inch Curved UltraWide Monitor" className="text-black">34-inch Curved UltraWide Monitor</option>
+              <option value="Single 27-inch 4K Display" className="text-black">Single 27-inch 4K Display</option>
+            </select>
+          </div>
+
+          <div className="flex flex-col gap-1.5 text-left">
+            <label className="text-[10px] font-mono uppercase text-on-surface-variant">Accessories</label>
+            <select value={peripherals} onChange={e => setPeripherals(e.target.value)} disabled={disabled} className="bg-black/30 border border-white/10 rounded-lg p-2 text-xs text-white focus:outline-none focus:border-primary">
+              <option value="Ergonomic Keyboard & Precision Mouse" className="text-black">Ergonomic Keyboard & Precision Mouse</option>
+              <option value="Noise-Canceling Wireless Headset" className="text-black">Noise-Canceling Wireless Headset</option>
+              <option value="Complete Developer Bundle" className="text-black">Complete Developer Bundle</option>
+            </select>
+          </div>
+
+          <button onClick={handleSubmit} disabled={disabled} className="mt-1 w-full bg-primary hover:brightness-110 text-on-primary font-bold py-2.5 rounded-lg transition-colors text-sm flex items-center justify-center gap-2 shadow-[0_0_15px_rgba(41,161,149,0.3)]">
+            <CheckCircle2 className="w-4 h-4"/> Submit Hardware Order
+          </button>
+        </>
+      )}
+    </div>
+  );
+};
+
+const ESignatureWidget = ({ onSubmit, disabled }) => {
+  const canvasRef = useRef(null);
+  const [isSigned, setIsSigned] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
+
+  const clearCanvas = () => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d");
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    setIsSigned(false);
+  };
+
+  const handleMouseDown = (e) => {
+    if (disabled || submitted) return;
+    const canvas = canvasRef.current;
+    const ctx = canvas.getContext("2d");
+    const rect = canvas.getBoundingClientRect();
+    ctx.beginPath();
+    ctx.moveTo(e.clientX - rect.left, e.clientY - rect.top);
+
+    const handleMouseMove = (me) => {
+      ctx.lineTo(me.clientX - rect.left, me.clientY - rect.top);
+      ctx.strokeStyle = "#29a195";
+      ctx.lineWidth = 2;
+      ctx.stroke();
+      setIsSigned(true);
+    };
+
+    const handleMouseUp = () => {
+      canvas.removeEventListener("mousemove", handleMouseMove);
+      canvas.removeEventListener("mouseup", handleMouseUp);
+    };
+
+    canvas.addEventListener("mousemove", handleMouseMove);
+    canvas.addEventListener("mouseup", handleMouseUp);
+  };
+
+  const handleSave = () => {
+    if (!isSigned) return;
+    setSubmitted(true);
+    onSubmit("ACTION:SUBMIT_SIGNATURE|document:Employee_NDA_Policy");
+  };
+
+  return (
+    <div className="bg-black/40 border border-primary/30 rounded-2xl p-5 shadow-lg w-full min-w-[300px] max-w-sm flex flex-col gap-4 animate-fade-in-up">
+      <h3 className="text-primary font-bold flex items-center gap-2 text-sm"><PenTool className="w-4 h-4"/> Digital E-Signature Pad</h3>
+      {submitted ? (
+        <div className="flex flex-col items-center gap-2 text-center py-4">
+          <CheckCircle2 className="w-10 h-10 text-secondary" />
+          <p className="text-sm font-semibold text-white">Signature Recorded</p>
+          <p className="text-xs text-on-surface-variant font-mono">Employee NDA & Policy Agreement</p>
+        </div>
+      ) : (
+        <>
+          <p className="text-xs text-on-surface-variant leading-relaxed">Draw your digital signature below to execute the onboarding agreements:</p>
+          <div className="border border-white/20 rounded-xl bg-black/40 p-1">
+            <canvas 
+              ref={canvasRef}
+              width={280}
+              height={100}
+              onMouseDown={handleMouseDown}
+              className="w-full bg-black/50 rounded-lg cursor-crosshair"
+            />
+          </div>
+          <div className="flex gap-2">
+            <button onClick={clearCanvas} disabled={disabled} className="flex-1 bg-white/5 border border-white/10 hover:bg-white/10 text-white py-2 rounded-lg text-xs font-semibold">
+              Clear
+            </button>
+            <button onClick={handleSave} disabled={disabled || !isSigned} className="flex-1 bg-primary hover:brightness-110 text-on-primary py-2 rounded-lg text-xs font-bold disabled:opacity-50">
+              Confirm Signature
+            </button>
+          </div>
+        </>
+      )}
+    </div>
+  );
+};
+
+const PeerMentorCard = () => (
+  <div className="bg-black/40 border border-white/10 rounded-2xl p-4 flex items-center gap-3 shadow-lg max-w-sm">
+    <div className="w-10 h-10 rounded-full bg-primary/20 border border-primary/40 flex items-center justify-center font-bold text-primary text-sm font-mono">
+      DV
+    </div>
+    <div className="flex-1 text-left">
+      <h4 className="text-xs font-bold text-white leading-tight">David Vance</h4>
+      <span className="text-[10px] text-primary font-mono block">Senior Onboarding Buddy</span>
+      <span className="text-[10px] text-on-surface-variant font-mono truncate block">d.vance@luminasystems.com</span>
+    </div>
+    <a href="mailto:d.vance@luminasystems.com" className="px-2.5 py-1.5 rounded-lg bg-white/5 border border-white/10 hover:bg-white/10 text-[10px] font-semibold text-white transition-all">
+      Connect
+    </a>
+  </div>
+);
 
 export default function ChatScreen({ user, onLogout }) {
   const [messages, setMessages] = useState([
@@ -186,9 +346,11 @@ export default function ChatScreen({ user, onLogout }) {
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [pendingApprovalId, setPendingApprovalId] = useState(null);
-  const [approvalStatus, setApprovalStatus] = useState(null); // 'pending', 'approved', 'rejected'
-  
-  // Stateful Onboarding Progress Tracker
+  const [approvalStatus, setApprovalStatus] = useState(null);
+  const [isListening, setIsListening] = useState(false);
+  const [persona, setPersona] = useState("professional");
+  const [language, setLanguage] = useState("en");
+
   const [onboardingTasks, setOnboardingTasks] = useState({
     login: true,
     policy: false,
@@ -201,6 +363,32 @@ export default function ChatScreen({ user, onLogout }) {
     const total = Object.keys(onboardingTasks).length;
     const completed = Object.values(onboardingTasks).filter(v => v).length;
     return Math.round((completed / total) * 100);
+  };
+
+  const handleVoiceInput = () => {
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+      alert("Speech recognition is not supported in this browser.");
+      return;
+    }
+    const recognition = new SpeechRecognition();
+    recognition.lang = language === "es" ? "es-ES" : language === "fr" ? "fr-FR" : language === "de" ? "de-DE" : "en-US";
+    recognition.onstart = () => setIsListening(true);
+    recognition.onresult = (e) => {
+      const transcript = e.results[0][0].transcript;
+      setInput(transcript);
+      setIsListening(false);
+    };
+    recognition.onerror = () => setIsListening(false);
+    recognition.onend = () => setIsListening(false);
+    recognition.start();
+  };
+
+  const speakText = (text) => {
+    if (!window.speechSynthesis) return;
+    window.speechSynthesis.cancel();
+    const utterance = new SpeechSynthesisUtterance(text.replace(/<[^>]*>?/gm, ''));
+    window.speechSynthesis.speak(utterance);
   };
 
   const messagesEndRef = useRef(null);
@@ -327,7 +515,9 @@ export default function ChatScreen({ user, onLogout }) {
           "Authorization": `Bearer ${user.token}`
         },
         body: JSON.stringify({
-          message: messageText
+          message: messageText,
+          persona: persona,
+          language: language
         })
       });
 
@@ -473,6 +663,30 @@ export default function ChatScreen({ user, onLogout }) {
               <FileText className="w-5 h-5 text-primary group-hover:scale-110 transition-transform" />
               <span className="text-sm font-semibold">Documents</span>
             </button>
+            <button 
+              onClick={() => setMessages(prev => [...prev, { sender: "it_provisioner", content: "WIDGET:HARDWARE_ORDER" }])}
+              disabled={isLoading || !!pendingApprovalId}
+              className="flex items-center gap-3 p-3 rounded-lg text-on-surface hover:bg-white/5 transition-all duration-200 group w-full text-left disabled:opacity-50 disabled:pointer-events-none"
+            >
+              <Cpu className="w-5 h-5 text-primary group-hover:scale-110 transition-transform" />
+              <span className="text-sm font-semibold">Hardware Order</span>
+            </button>
+            <button 
+              onClick={() => setMessages(prev => [...prev, { sender: "knowledge_rag", content: "WIDGET:E_SIGNATURE" }])}
+              disabled={isLoading || !!pendingApprovalId}
+              className="flex items-center gap-3 p-3 rounded-lg text-on-surface hover:bg-white/5 transition-all duration-200 group w-full text-left disabled:opacity-50 disabled:pointer-events-none"
+            >
+              <PenTool className="w-5 h-5 text-primary group-hover:scale-110 transition-transform" />
+              <span className="text-sm font-semibold">Sign Policy</span>
+            </button>
+            <button 
+              onClick={() => setMessages(prev => [...prev, { sender: "knowledge_rag", content: "WIDGET:PEER_MENTOR" }])}
+              disabled={isLoading || !!pendingApprovalId}
+              className="flex items-center gap-3 p-3 rounded-lg text-on-surface hover:bg-white/5 transition-all duration-200 group w-full text-left disabled:opacity-50 disabled:pointer-events-none"
+            >
+              <UserCheck className="w-5 h-5 text-primary group-hover:scale-110 transition-transform" />
+              <span className="text-sm font-semibold">Peer Mentor</span>
+            </button>
           </nav>
 
           {/* HR Contact Block */}
@@ -508,13 +722,25 @@ export default function ChatScreen({ user, onLogout }) {
             </div>
           </div>
           <div className="flex items-center gap-2 relative">
-            <div className="relative hidden sm:flex items-center">
-              <Search className="w-4 h-4 text-on-surface-variant/60 absolute left-3 pointer-events-none" />
-              <input
-                type="text"
-                placeholder="Search messages..."
-                className="bg-black/30 border border-white/10 rounded-full py-1.5 pl-9 pr-4 text-xs text-white placeholder-on-surface-variant/40 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary w-40 focus:w-56 transition-all duration-300"
-              />
+            {/* Persona Selector */}
+            <div className="hidden md:flex items-center gap-1 bg-black/30 border border-white/10 rounded-lg px-2 py-1">
+              <Sparkles className="w-3.5 h-3.5 text-primary" />
+              <select value={persona} onChange={e => setPersona(e.target.value)} className="bg-transparent text-xs text-white focus:outline-none cursor-pointer">
+                <option value="professional" className="bg-slate-900 text-white">Professional HR</option>
+                <option value="tech_mentor" className="bg-slate-900 text-white">Tech Mentor</option>
+                <option value="executive" className="bg-slate-900 text-white">Executive Guide</option>
+              </select>
+            </div>
+
+            {/* Language Selector */}
+            <div className="hidden sm:flex items-center gap-1 bg-black/30 border border-white/10 rounded-lg px-2 py-1">
+              <span className="text-[10px] font-mono text-secondary uppercase font-bold">LANG</span>
+              <select value={language} onChange={e => setLanguage(e.target.value)} className="bg-transparent text-xs text-white focus:outline-none cursor-pointer">
+                <option value="en" className="bg-slate-900 text-white">English (EN)</option>
+                <option value="es" className="bg-slate-900 text-white">Español (ES)</option>
+                <option value="fr" className="bg-slate-900 text-white">Français (FR)</option>
+                <option value="de" className="bg-slate-900 text-white">Deutsch (DE)</option>
+              </select>
             </div>
             {/* Mobile search button */}
             <button className="sm:hidden p-2 rounded-full hover:bg-white/10 text-on-surface-variant transition-colors">
@@ -558,16 +784,31 @@ export default function ChatScreen({ user, onLogout }) {
                         onSubmit={sendMessage} 
                         disabled={isLoading || !!pendingApprovalId || i !== messages.length - 1} 
                       />
+                    ) : msg.content === "WIDGET:HARDWARE_ORDER" ? (
+                      <HardwareProcurementWidget 
+                        onSubmit={sendMessage} 
+                        disabled={isLoading || !!pendingApprovalId || i !== messages.length - 1} 
+                      />
+                    ) : msg.content === "WIDGET:E_SIGNATURE" ? (
+                      <ESignatureWidget 
+                        onSubmit={sendMessage} 
+                        disabled={isLoading || !!pendingApprovalId || i !== messages.length - 1} 
+                      />
+                    ) : msg.content === "WIDGET:PEER_MENTOR" ? (
+                      <PeerMentorCard />
                     ) : msg.content === "WIDGET:DOCUMENT_UPLOAD" ? (
                       <DocumentUploadWidget 
                         onUpload={sendMessage} 
                         disabled={isLoading || !!pendingApprovalId || i !== messages.length - 1} 
                       />
-                    ) : msg.content === "WIDGET:DOCUMENT_UPLOAD" ? (
-                      <DocumentUploadWidget 
-                        onUpload={sendMessage} 
-                        disabled={isLoading || !!pendingApprovalId || i !== messages.length - 1} 
-                      />
+                    ) : msg.content.startsWith("ACTION:SUBMIT_HARDWARE|") ? (
+                      <div className="px-5 py-3 rounded-2xl rounded-tl-sm glass-panel text-white/50 shadow-lg text-sm italic md:text-[15px] leading-relaxed text-left">
+                        [Hardware Procurement Order Submitted]
+                      </div>
+                    ) : msg.content.startsWith("ACTION:SUBMIT_SIGNATURE|") ? (
+                      <div className="px-5 py-3 rounded-2xl rounded-tl-sm glass-panel text-white/50 shadow-lg text-sm italic md:text-[15px] leading-relaxed text-left">
+                        [Digital Signature Recorded]
+                      </div>
                     ) : msg.content.startsWith("ACTION:SUBMIT_LEAVE|") ? (
                       <div className="px-5 py-3 rounded-2xl rounded-tl-sm glass-panel text-white/50 shadow-lg text-sm italic md:text-[15px] leading-relaxed text-left">
                         [Leave Request Form Submitted]
@@ -575,10 +816,6 @@ export default function ChatScreen({ user, onLogout }) {
                     ) : msg.content.startsWith("ACTION:SUBMIT_IT|") ? (
                       <div className="px-5 py-3 rounded-2xl rounded-tl-sm glass-panel text-white/50 shadow-lg text-sm italic md:text-[15px] leading-relaxed text-left">
                         [IT Provisioning Form Submitted]
-                      </div>
-                    ) : msg.content.startsWith("ACTION:SUBMIT_DOC|") ? (
-                      <div className="px-5 py-3 rounded-2xl rounded-tl-sm glass-panel text-white/50 shadow-lg text-sm italic md:text-[15px] leading-relaxed text-left">
-                        [Document Upload Form Submitted]
                       </div>
                     ) : msg.content.startsWith("ACTION:SUBMIT_DOC|") ? (
                       <div className="px-5 py-3 rounded-2xl rounded-tl-sm glass-panel text-white/50 shadow-lg text-sm italic md:text-[15px] leading-relaxed text-left">
@@ -681,6 +918,19 @@ export default function ChatScreen({ user, onLogout }) {
               style={{ minHeight: "52px" }}
               className="w-full bg-black/40 border border-white/10 rounded-2xl py-3 pl-4 pr-14 text-white placeholder-on-surface-variant/50 resize-none max-h-32 focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary focus:bg-black/60 transition-all duration-300"
             />
+            <button 
+              type="button"
+              onClick={handleVoiceInput}
+              disabled={isLoading || !!pendingApprovalId}
+              title="Voice Input (Speech-to-Text)"
+              className={`absolute right-14 bottom-2 w-10 h-10 rounded-xl border transition-all flex items-center justify-center ${
+                isListening 
+                  ? "bg-red-500/20 text-red-400 border-red-500/40 animate-pulse" 
+                  : "bg-white/5 text-on-surface-variant border-white/10 hover:bg-white/10 hover:text-white"
+              }`}
+            >
+              <Mic className="w-4 h-4" />
+            </button>
             <button 
               type="submit"
               disabled={isLoading || !!pendingApprovalId || !input.trim()}
