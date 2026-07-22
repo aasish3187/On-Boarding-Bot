@@ -780,13 +780,13 @@ export default function ChatScreen({ user, onLogout }) {
       <main className={`flex-1 flex flex-col rounded-3xl shadow-2xl relative overflow-hidden h-full transition-colors duration-500 ${isDarkMode ? "glass-panel" : "liquid-glass-panel"}`}>
         
         {/* iOS Dynamic Island Top Header */}
-        <header className="h-16 flex items-center justify-between px-6 border-b border-white/10 relative z-40 shrink-0">
+        <header className={`h-16 flex items-center justify-between px-6 border-b transition-colors duration-500 relative z-40 shrink-0 ${isDarkMode ? "border-white/10" : "border-slate-300/70 bg-white/40"}`}>
           <div className="flex items-center gap-3">
-            <span className="font-bold text-lg text-primary tracking-tight font-mono">OnboardBot</span>
+            <span className={`font-bold text-lg tracking-tight font-mono ${isDarkMode ? "text-sky-400" : "text-sky-600"}`}>OnboardBot</span>
           </div>
 
-          {/* Centered Floating Dynamic Island Capsule */}
-          <div className="dynamic-island cursor-pointer bg-slate-950/90 text-white border border-white/20 rounded-full px-5 py-2 flex items-center gap-4 shadow-2xl backdrop-blur-xl relative z-50 group hover:px-6 transition-all duration-500">
+          {/* Centered Floating Dynamic Island Capsule (Combined Hover Morph) */}
+          <div className="dynamic-island cursor-pointer bg-slate-950 text-white border border-white/20 rounded-full px-5 py-2 flex items-center gap-3.5 shadow-2xl backdrop-blur-xl relative z-50 group transition-all duration-500 hover:px-6">
             <div className="flex items-center gap-2">
               <div className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse shadow-[0_0_8px_rgba(52,211,153,0.8)]"></div>
               <span className="text-xs font-mono font-bold text-emerald-400 uppercase tracking-wider">AI ACTIVE</span>
@@ -805,42 +805,75 @@ export default function ChatScreen({ user, onLogout }) {
             ) : (
               <div className="flex items-center gap-2">
                 <Sparkles className="w-3.5 h-3.5 text-sky-400" />
-                <span className="text-xs font-mono text-white/90">{calculateProgress()}% Onboarded</span>
+                <span className="text-xs font-mono font-semibold text-white">{calculateProgress()}% Onboarded</span>
               </div>
             )}
 
-            {/* Dynamic Island Expansion Content on Hover */}
-            <div className="hidden group-hover:flex items-center gap-3 pl-2 border-l border-white/20 animate-fade-in-up">
-              <select value={persona} onChange={e => setPersona(e.target.value)} className="bg-transparent text-[11px] font-mono text-sky-300 focus:outline-none cursor-pointer">
-                <option value="professional" className="bg-slate-900 text-white">Professional HR</option>
-                <option value="tech_mentor" className="bg-slate-900 text-white">Tech Mentor</option>
-                <option value="executive" className="bg-slate-900 text-white">Executive Guide</option>
-              </select>
-
-              <select value={language} onChange={e => setLanguage(e.target.value)} className="bg-transparent text-[11px] font-mono text-emerald-300 focus:outline-none cursor-pointer">
-                <option value="en" className="bg-slate-900 text-white">EN</option>
-                <option value="es" className="bg-slate-900 text-white">ES</option>
-                <option value="fr" className="bg-slate-900 text-white">FR</option>
-                <option value="de" className="bg-slate-900 text-white">DE</option>
-              </select>
+            {/* Combined Expanded Details on Hover */}
+            <div className="hidden group-hover:flex items-center gap-3 pl-3 border-l border-white/20 animate-fade-in-up">
+              <span className="text-[11px] font-mono text-cyan-300 font-bold">5/5 Milestones</span>
+              <div className="h-3 w-px bg-white/20"></div>
+              <span className="text-[11px] font-mono text-emerald-300 font-bold">Enterprise Mode</span>
             </div>
           </div>
 
-          <div className="flex items-center gap-2 relative">
+          {/* Right Control Bar */}
+          <div className="flex items-center gap-2.5 relative">
+            {/* Persona Selector (Outside) */}
+            <div className={`hidden lg:flex items-center gap-1.5 px-3 py-1.5 rounded-xl border transition-all ${
+              isDarkMode ? "bg-slate-900/80 border-white/15 text-white" : "bg-white/80 border-slate-300 text-slate-800 shadow-sm"
+            }`}>
+              <Sparkles className={`w-3.5 h-3.5 ${isDarkMode ? "text-sky-400" : "text-sky-600"}`} />
+              <select 
+                value={persona} 
+                onChange={e => setPersona(e.target.value)} 
+                className={`bg-transparent text-xs font-semibold focus:outline-none cursor-pointer ${
+                  isDarkMode ? "text-white" : "text-slate-800"
+                }`}
+              >
+                <option value="professional" className={isDarkMode ? "bg-slate-900 text-white" : "bg-white text-slate-900"}>Professional HR</option>
+                <option value="tech_mentor" className={isDarkMode ? "bg-slate-900 text-white" : "bg-white text-slate-900"}>Tech Mentor</option>
+                <option value="executive" className={isDarkMode ? "bg-slate-900 text-white" : "bg-white text-slate-900"}>Executive Guide</option>
+              </select>
+            </div>
+
+            {/* Language Selector (Outside) */}
+            <div className={`hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl border transition-all ${
+              isDarkMode ? "bg-slate-900/80 border-white/15 text-white" : "bg-white/80 border-slate-300 text-slate-800 shadow-sm"
+            }`}>
+              <span className={`text-[10px] font-mono font-bold uppercase ${isDarkMode ? "text-emerald-400" : "text-emerald-600"}`}>LANG</span>
+              <select 
+                value={language} 
+                onChange={e => setLanguage(e.target.value)} 
+                className={`bg-transparent text-xs font-semibold focus:outline-none cursor-pointer ${
+                  isDarkMode ? "text-white" : "text-slate-800"
+                }`}
+              >
+                <option value="en" className={isDarkMode ? "bg-slate-900 text-white" : "bg-white text-slate-900"}>English (EN)</option>
+                <option value="es" className={isDarkMode ? "bg-slate-900 text-white" : "bg-white text-slate-900"}>Español (ES)</option>
+                <option value="fr" className={isDarkMode ? "bg-slate-900 text-white" : "bg-white text-slate-900"}>Français (FR)</option>
+                <option value="de" className={isDarkMode ? "bg-slate-900 text-white" : "bg-white text-slate-900"}>Deutsch (DE)</option>
+              </select>
+            </div>
+
             {/* Light / Dark Mode Toggle */}
             <button 
               onClick={() => setIsDarkMode(!isDarkMode)}
               title={isDarkMode ? "Switch to liquidGlass Light Mode" : "Switch to Deep Obsidian Dark Mode"}
-              className="p-2 rounded-full hover:bg-white/10 text-on-surface-variant transition-colors"
+              className={`p-2 rounded-xl transition-all border ${
+                isDarkMode 
+                  ? "bg-slate-900/80 border-white/15 text-yellow-400 hover:bg-white/10" 
+                  : "bg-white/80 border-slate-300 text-sky-600 hover:bg-slate-200/60 shadow-sm"
+              }`}
             >
-              {isDarkMode ? <Sun className="w-4 h-4 text-yellow-400" /> : <Moon className="w-4 h-4 text-sky-500" />}
+              {isDarkMode ? <Sun className="w-4 h-4 text-yellow-400" /> : <Moon className="w-4 h-4 text-sky-600" />}
             </button>
 
             {/* Header Sign Out Button */}
             <button 
               onClick={onLogout} 
               title="Sign Out to switch account" 
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-red-500/10 border border-red-500/20 hover:bg-red-500/20 text-xs font-semibold text-red-300 transition-all cursor-pointer shrink-0"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-red-500/10 border border-red-500/30 hover:bg-red-500/20 text-xs font-semibold text-red-400 hover:text-red-300 transition-all cursor-pointer shrink-0"
             >
               <LogOut className="w-3.5 h-3.5" /> 
               <span>Sign Out</span>
@@ -850,51 +883,57 @@ export default function ChatScreen({ user, onLogout }) {
             <div className="relative">
               <button 
                 onClick={() => setShowMenu(!showMenu)}
-                className="p-2 rounded-full hover:bg-white/10 text-on-surface-variant transition-colors"
+                className={`p-2 rounded-xl transition-all border ${
+                  isDarkMode 
+                    ? "bg-slate-900/80 border-white/15 text-white hover:bg-white/10" 
+                    : "bg-white/80 border-slate-300 text-slate-800 hover:bg-slate-200/60 shadow-sm"
+                }`}
               >
-                <MoreVertical className="w-5 h-5" />
+                <MoreVertical className="w-4 h-4" />
               </button>
 
               {/* Three Dots Dropdown Menu */}
               {showMenu && (
-                <div className="absolute right-0 mt-2 w-56 glass-panel bg-slate-900/95 border border-white/15 rounded-xl shadow-2xl py-2 z-50 animate-fade-in-up text-left">
+                <div className={`absolute right-0 mt-2 w-56 border rounded-xl shadow-2xl py-2 z-50 animate-fade-in-up text-left ${
+                  isDarkMode ? "bg-slate-900/95 border-white/15 text-white" : "bg-white/95 border-slate-300 text-slate-800 shadow-xl"
+                }`}>
                   <button 
                     onClick={() => { setIsDarkMode(!isDarkMode); setShowMenu(false); }}
-                    className="w-full px-4 py-2 text-xs text-on-surface hover:bg-white/10 flex items-center gap-2.5 transition-colors"
+                    className="w-full px-4 py-2 text-xs hover:bg-slate-500/10 flex items-center gap-2.5 transition-colors font-medium"
                   >
-                    {isDarkMode ? <Sun className="w-4 h-4 text-yellow-400" /> : <Moon className="w-4 h-4 text-secondary" />}
+                    {isDarkMode ? <Sun className="w-4 h-4 text-yellow-400" /> : <Moon className="w-4 h-4 text-sky-600" />}
                     <span>{isDarkMode ? "Switch to liquidGlass Light" : "Switch to Deep Obsidian Dark"}</span>
                   </button>
 
                   <button 
                     onClick={handleClearChat}
-                    className="w-full px-4 py-2 text-xs text-on-surface hover:bg-white/10 flex items-center gap-2.5 transition-colors"
+                    className="w-full px-4 py-2 text-xs hover:bg-slate-500/10 flex items-center gap-2.5 transition-colors font-medium"
                   >
-                    <Trash2 className="w-4 h-4 text-primary" />
+                    <Trash2 className="w-4 h-4 text-sky-500" />
                     <span>Clear Chat History</span>
                   </button>
 
                   <button 
                     onClick={handleDownloadSummary}
-                    className="w-full px-4 py-2 text-xs text-on-surface hover:bg-white/10 flex items-center gap-2.5 transition-colors"
+                    className="w-full px-4 py-2 text-xs hover:bg-slate-500/10 flex items-center gap-2.5 transition-colors font-medium"
                   >
-                    <Download className="w-4 h-4 text-secondary" />
+                    <Download className="w-4 h-4 text-emerald-500" />
                     <span>Export Chat Log</span>
                   </button>
 
                   <button 
                     onClick={() => { setMessages(prev => [...prev, { sender: "knowledge_rag", content: "WIDGET:PEER_MENTOR" }]); setShowMenu(false); }}
-                    className="w-full px-4 py-2 text-xs text-on-surface hover:bg-white/10 flex items-center gap-2.5 transition-colors"
+                    className="w-full px-4 py-2 text-xs hover:bg-slate-500/10 flex items-center gap-2.5 transition-colors font-medium"
                   >
-                    <Headphones className="w-4 h-4 text-tertiary" />
+                    <Headphones className="w-4 h-4 text-indigo-500" />
                     <span>HR Support Hotdesk</span>
                   </button>
 
-                  <div className="my-1 border-t border-white/10"></div>
+                  <div className={`my-1 border-t ${isDarkMode ? "border-white/10" : "border-slate-200"}`}></div>
 
                   <button 
                     onClick={onLogout}
-                    className="w-full px-4 py-2 text-xs text-red-300 hover:bg-red-500/10 flex items-center gap-2.5 transition-colors font-semibold"
+                    className="w-full px-4 py-2 text-xs text-red-500 hover:bg-red-500/10 flex items-center gap-2.5 transition-colors font-semibold"
                   >
                     <LogOut className="w-4 h-4" />
                     <span>Sign Out</span>
