@@ -27,17 +27,11 @@ The system is designed with a multi-agent LangGraph architecture where a supervi
 ### Premium Glassmorphism Login
 ![OnboardBot Login](screenshots/login.png)
 
-### AI Chat Assistant -- Dark Mode
-![OnboardBot Chat Dark Mode](screenshots/chat_dark.png)
+### Conversational Chat Assistant
+![OnboardBot Chat](screenshots/chat.png)
 
-### AI Chat Assistant -- Light Mode (LiquidGlass UI)
-![OnboardBot Chat Light Mode](screenshots/chat_light.png)
-
-### HR Admin Dashboard
-![HR Dashboard](screenshots/hr_dashboard.png)
-
-### Interactive Form Widgets
-![Widgets Showcase](screenshots/widgets.png)
+### Interactive Leave Request Form (Widget)
+![Leave Request Widget](screenshots/leave_widget.png)
 
 ---
 
