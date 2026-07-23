@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { ToyBrick, User, Shield, Eye, EyeOff, ArrowRight } from "lucide-react";
+import { API_BASE_URL } from "../config";
 
 export default function LoginScreen({ onLoginSuccess }) {
   const [isLoginTab, setIsLoginTab] = useState(true);
@@ -29,109 +30,157 @@ export default function LoginScreen({ onLoginSuccess }) {
       varying vec2 v_texCoord;
       void main() {
         v_texCoord = a_position * 0.5 + 0.5;
+        v_texCoord.y = 1.0 - v_texCoord.y;
         gl_Position = vec4(a_position, 0.0, 1.0);
       }
     `;
 
     const fsSource = `
-      precision highp float;
+      precision mediump float;
       varying vec2 v_texCoord;
       uniform float u_time;
       uniform vec2 u_resolution;
 
+      #define PI 3.14159265359
+
+      // Subtle noise for organic motion
+      float hash(vec2 p) {
+        return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453123);
+      }
+
+      float noise(vec2 p) {
+        vec2 i = floor(p);
+        vec2 f = fract(p);
+        vec2 u = f * f * (3.0 - 2.0 * f);
+        return mix(mix(hash(i + vec2(0.0, 0.0)), hash(i + vec2(1.0, 0.0)), u.x),
+                   mix(hash(i + vec2(0.0, 1.0)), hash(i + vec2(1.0, 1.0)), u.x), u.y);
+      }
+
       void main() {
-        vec2 uv = v_texCoord;
-        float t = u_time * 0.15;
+        vec2 uv = gl_FragCoord.xy / u_resolution.xy;
         
-        vec3 color1 = vec3(0.01, 0.08, 0.15); // Deep navy
-        vec3 color2 = vec3(0.04, 0.11, 0.21); // Deep slate
-        vec3 color3 = vec3(0.08, 0.15, 0.27); // Subtle indigo
-        vec3 color4 = vec3(0.02, 0.05, 0.12); // Near black navy
+        // Fluid, slow-moving mesh gradient
+        float t = u_time * 0.015;
         
-        float n1 = sin(uv.x * 2.0 + t) * 0.5 + 0.5;
-        float n2 = cos(uv.y * 3.0 - t * 0.8) * 0.5 + 0.5;
-        float n3 = sin((uv.x + uv.y) * 1.5 + t * 0.5) * 0.5 + 0.5;
+        // Dynamic centers with different frequency and radius
+        vec2 c1 = vec2(0.5 + 0.35 * sin(t * 1.3), 0.5 + 0.35 * cos(t * 0.8));
+        vec2 c2 = vec2(0.5 + 0.35 * cos(t * 0.9 + 2.0), 0.5 + 0.35 * sin(t * 1.4));
+        vec2 c3 = vec2(0.3 + 0.25 * sin(t * 1.7 - 1.0), 0.7 + 0.25 * cos(t * 1.1));
         
-        vec3 finalColor = mix(color1, color2, n1);
-        finalColor = mix(finalColor, color3, n2 * 0.5);
-        finalColor = mix(finalColor, color4, n3 * 0.3);
+        float d1 = length(uv - c1);
+        float d2 = length(uv - c2);
+        float d3 = length(uv - c3);
         
-        float grain = fract(sin(dot(uv, vec2(12.9898, 78.233))) * 43758.5453);
-        finalColor += grain * 0.01;
+        // Smooth noise modifications
+        float n1 = noise(uv * 3.0 + t);
+        float n2 = noise(uv * 4.0 - t * 0.5);
         
-        gl_FragColor = vec4(finalColor, 1.0);
+        d1 += n1 * 0.08;
+        d2 += n2 * 0.08;
+        
+        // Base background (Deep Dark Navy)
+        vec3 color = vec3(0.03, 0.05, 0.09);
+        
+        // Radial colors
+        vec3 col1 = vec3(0.05, 0.22, 0.42); // Muted Royal Blue
+        vec3 col2 = vec3(0.04, 0.16, 0.32); // Deep Ocean Blue
+        vec3 col3 = vec3(0.08, 0.10, 0.18); // Cool Slate Slate
+        
+        // Blend colors using smooth step
+        color = mix(color, col1, smoothstep(0.7, 0.0, d1));
+        color = mix(color, col2, smoothstep(0.6, 0.0, d2));
+        color = mix(color, col3, smoothstep(0.5, 0.0, d3));
+        
+        // Add extremely subtle organic light shifts
+        color += vec3(noise(uv * 8.0 + t * 2.0)) * 0.008;
+
+        gl_FragColor = vec4(color, 1.0);
       }
     `;
 
-    const compileShader = (source, type) => {
+    function loadShader(type, source) {
       const shader = gl.createShader(type);
       gl.shaderSource(shader, source);
       gl.compileShader(shader);
       if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
-        console.error("Shader compile error:", gl.getShaderInfoLog(shader));
+        console.error("Shader compile error: " + gl.getShaderInfoLog(shader));
         gl.deleteShader(shader);
         return null;
       }
       return shader;
-    };
+    }
+
+    const vertexShader = loadShader(gl.VERTEX_SHADER, vsSource);
+    const fragmentShader = loadShader(gl.FRAGMENT_SHADER, fsSource);
 
     const program = gl.createProgram();
-    const vs = compileShader(vsSource, gl.VERTEX_SHADER);
-    const fs = compileShader(fsSource, gl.FRAGMENT_SHADER);
-    if (!vs || !fs) return;
-
-    gl.attachShader(program, vs);
-    gl.attachShader(program, fs);
+    gl.attachShader(program, vertexShader);
+    gl.attachShader(program, fragmentShader);
     gl.linkProgram(program);
 
     if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
-      console.error("Shader link error:", gl.getProgramInfoLog(program));
+      console.error("Program link error: " + gl.getProgramInfoLog(program));
       return;
     }
 
-    gl.useProgram(program);
+    const positionAttributeLocation = gl.getAttribLocation(program, "a_position");
+    const timeUniformLocation = gl.getUniformLocation(program, "u_time");
+    const resolutionUniformLocation = gl.getUniformLocation(program, "u_resolution");
 
     const positionBuffer = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
-    gl.bufferData(
-      gl.ARRAY_BUFFER,
-      new Float32Array([-1, -1, 1, -1, -1, 1, -1, 1, 1, -1, 1, 1]),
-      gl.STATIC_DRAW
-    );
+    const positions = [
+      -1, -1,
+       1, -1,
+      -1,  1,
+      -1,  1,
+       1, -1,
+       1,  1,
+    ];
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(positions), gl.STATIC_DRAW);
 
-    const positionLoc = gl.getAttribLocation(program, "a_position");
-    gl.enableVertexAttribArray(positionLoc);
-    gl.vertexAttribPointer(positionLoc, 2, gl.FLOAT, false, 0, 0);
-
-    const timeLoc = gl.getUniformLocation(program, "u_time");
-    const resLoc = gl.getUniformLocation(program, "u_resolution");
-
-    const resize = () => {
-      const displayWidth = canvas.clientWidth;
-      const displayHeight = canvas.clientHeight;
-      if (canvas.width !== displayWidth || canvas.height !== displayHeight) {
-        canvas.width = displayWidth;
-        canvas.height = displayHeight;
+    function resizeCanvasToDisplaySize(canvas) {
+      const width  = canvas.clientWidth;
+      const height = canvas.clientHeight;
+      if (canvas.width !== width || canvas.height !== height) {
+        canvas.width  = width;
+        canvas.height = height;
+        return true;
       }
-    };
+      return false;
+    }
 
-    const render = (time) => {
-      resize();
-      gl.viewport(0, 0, canvas.width, canvas.height);
-      gl.uniform1f(timeLoc, time * 0.001);
-      gl.uniform2f(resLoc, canvas.width, canvas.height);
+    let startTime = Date.now();
+
+    function render() {
+      resizeCanvasToDisplaySize(gl.canvas);
+      gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
+
+      gl.clearColor(0, 0, 0, 0);
+      gl.clear(gl.COLOR_BUFFER_BIT);
+
+      gl.useProgram(program);
+
+      gl.enableVertexAttribArray(positionAttributeLocation);
+      gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
+      gl.vertexAttribPointer(positionAttributeLocation, 2, gl.FLOAT, false, 0, 0);
+
+      gl.uniform1f(timeUniformLocation, (Date.now() - startTime) / 1000);
+      gl.uniform2f(resolutionUniformLocation, gl.canvas.width, gl.canvas.height);
+
       gl.drawArrays(gl.TRIANGLES, 0, 6);
-      animationFrameId = requestAnimationFrame(render);
-    };
 
-    animationFrameId = requestAnimationFrame(render);
+      animationFrameId = requestAnimationFrame(render);
+    }
+
+    render();
 
     return () => {
       cancelAnimationFrame(animationFrameId);
     };
   }, []);
 
-  const handleSubmit = async (e) => {
+  const handleAuthSubmit = async (e) => {
     e.preventDefault();
     setErrorMsg("");
     setIsLoading(true);
@@ -139,7 +188,7 @@ export default function LoginScreen({ onLoginSuccess }) {
     try {
       if (isLoginTab) {
         // Handle Login
-        const res = await fetch("http://localhost:8000/api/auth/login", {
+        const res = await fetch(`${API_BASE_URL}/api/auth/login`, {
           method: "POST",
           headers: { "Content-Type": "application/x-www-form-urlencoded" },
           body: new URLSearchParams({
@@ -164,7 +213,7 @@ export default function LoginScreen({ onLoginSuccess }) {
         });
       } else {
         // Handle Signup
-        const res = await fetch("http://localhost:8000/api/auth/signup", {
+        const res = await fetch(`${API_BASE_URL}/api/auth/signup`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
@@ -182,7 +231,7 @@ export default function LoginScreen({ onLoginSuccess }) {
         }
 
         // Auto-login after signup
-        const loginRes = await fetch("http://localhost:8000/api/auth/login", {
+        const loginRes = await fetch(`${API_BASE_URL}/api/auth/login`, {
           method: "POST",
           headers: { "Content-Type": "application/x-www-form-urlencoded" },
           body: new URLSearchParams({

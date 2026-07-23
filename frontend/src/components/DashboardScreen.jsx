@@ -18,6 +18,7 @@ import {
   Lightbulb,
   HardDrive
 } from "lucide-react";
+import { API_BASE_URL, WS_BASE_URL } from "../config";
 
 export default function DashboardScreen({ user, onLogout }) {
   const [approvals, setApprovals] = useState([]);
@@ -53,7 +54,7 @@ export default function DashboardScreen({ user, onLogout }) {
     setIsLoading(true);
     setError(null);
     try {
-      const response = await fetch("http://localhost:8000/api/v1/approvals/pending");
+      const response = await fetch(`${API_BASE_URL}/api/v1/approvals/pending`);
       if (!response.ok) throw new Error("Could not load approvals from server.");
       const data = await response.json();
       setApprovals(data);
@@ -69,7 +70,7 @@ export default function DashboardScreen({ user, onLogout }) {
     setIsLoading(true);
     setError(null);
     try {
-      const response = await fetch("http://localhost:8000/api/v1/approvals/history");
+      const response = await fetch(`${API_BASE_URL}/api/v1/approvals/history`);
       if (!response.ok) throw new Error("Could not load approvals history.");
       const data = await response.json();
       setApprovals(data);
@@ -84,7 +85,7 @@ export default function DashboardScreen({ user, onLogout }) {
   const fetchEmployees = async () => {
     setIsLoading(true);
     try {
-      const response = await fetch("http://localhost:8000/api/v1/users");
+      const response = await fetch(`${API_BASE_URL}/api/v1/users`);
       if (!response.ok) throw new Error("Failed to load employees");
       const data = await response.json();
       setEmployees(data);
@@ -99,7 +100,7 @@ export default function DashboardScreen({ user, onLogout }) {
   const fetchSettings = async () => {
     setIsLoading(true);
     try {
-      const response = await fetch("http://localhost:8000/api/v1/settings");
+      const response = await fetch(`${API_BASE_URL}/api/v1/settings`);
       if (!response.ok) throw new Error("Failed to load settings");
       const data = await response.json();
       setSettings(data);
@@ -115,7 +116,7 @@ export default function DashboardScreen({ user, onLogout }) {
     e.preventDefault();
     setIsLoading(true);
     try {
-      const response = await fetch("http://localhost:8000/api/v1/settings", {
+      const response = await fetch(`${API_BASE_URL}/api/v1/settings`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(settings)
@@ -133,7 +134,7 @@ export default function DashboardScreen({ user, onLogout }) {
   const createCustomRequest = async (e) => {
     e.preventDefault();
     try {
-      const response = await fetch("http://localhost:8000/api/v1/approvals", {
+      const response = await fetch(`${API_BASE_URL}/api/v1/approvals`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(newRequestForm)
@@ -152,7 +153,7 @@ export default function DashboardScreen({ user, onLogout }) {
   useEffect(() => {
     fetchPendingApprovals();
 
-    const ws = new WebSocket("ws://localhost:8000/api/ws");
+    const ws = new WebSocket(`${WS_BASE_URL}/api/ws`);
 
     ws.onopen = () => {
       console.log("[WebSocket] Connected in HR view");
@@ -177,7 +178,7 @@ export default function DashboardScreen({ user, onLogout }) {
   const fetchKanban = async () => {
     setIsLoading(true);
     try {
-      const response = await fetch("http://localhost:8000/api/v1/kanban");
+      const response = await fetch(`${API_BASE_URL}/api/v1/kanban`);
       if (!response.ok) throw new Error("Failed to load kanban");
       const data = await response.json();
       setKanban(data);
@@ -191,7 +192,7 @@ export default function DashboardScreen({ user, onLogout }) {
   const fetchHardware = async () => {
     setIsLoading(true);
     try {
-      const response = await fetch("http://localhost:8000/api/v1/hardware");
+      const response = await fetch(`${API_BASE_URL}/api/v1/hardware`);
       if (!response.ok) throw new Error("Failed to load hardware tickets");
       const data = await response.json();
       setHardwareTickets(data);
@@ -205,7 +206,7 @@ export default function DashboardScreen({ user, onLogout }) {
   const fetchInsights = async () => {
     setIsLoading(true);
     try {
-      const response = await fetch("http://localhost:8000/api/v1/insights");
+      const response = await fetch(`${API_BASE_URL}/api/v1/insights`);
       if (!response.ok) throw new Error("Failed to load policy insights");
       const data = await response.json();
       setInsights(data);
@@ -218,7 +219,7 @@ export default function DashboardScreen({ user, onLogout }) {
 
   const handleApproveHardware = async (ticketId, action) => {
     try {
-      const response = await fetch("http://localhost:8000/api/v1/hardware/approve", {
+      const response = await fetch(`${API_BASE_URL}/api/v1/hardware/approve`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ ticket_id: ticketId, action })
@@ -251,7 +252,7 @@ export default function DashboardScreen({ user, onLogout }) {
   const handleAction = async (id, action, note = "") => {
     try {
       // Step 1: Post decision to approvals endpoint
-      const decisionResponse = await fetch(`http://localhost:8000/api/v1/approvals/${id}/decision`, {
+      const decisionResponse = await fetch(`${API_BASE_URL}/api/v1/approvals/${id}/decision`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ action, note: note || "HR Action Processed" })
@@ -263,7 +264,7 @@ export default function DashboardScreen({ user, onLogout }) {
       const threadId = decisionData.thread_id;
 
       // Step 2: Immediately post to chat resume endpoint to unblock agent
-      const resumeResponse = await fetch(`http://localhost:8000/api/v1/chat/${threadId}/resume`, {
+      const resumeResponse = await fetch(`${API_BASE_URL}/api/v1/chat/${threadId}/resume`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ action, note: note || "HR Action Processed" })
@@ -417,7 +418,7 @@ export default function DashboardScreen({ user, onLogout }) {
             {/* Dynamic Island Expansion Content on Hover */}
             <div className="hidden group-hover:flex items-center gap-3 pl-2 border-l border-white/20 animate-fade-in-up">
               <a 
-                href="http://localhost:8000/api/v1/export/audit-csv" 
+                href={`${API_BASE_URL}/api/v1/export/audit-csv`} 
                 target="_blank" 
                 rel="noreferrer"
                 className="text-[11px] font-mono font-bold text-emerald-400 hover:underline flex items-center gap-1"
@@ -430,7 +431,7 @@ export default function DashboardScreen({ user, onLogout }) {
 
           <div className="flex items-center gap-3">
             <a 
-              href="http://localhost:8000/api/v1/export/audit-csv" 
+              href={`${API_BASE_URL}/api/v1/export/audit-csv`} 
               target="_blank" 
               rel="noreferrer"
               className="text-xs font-semibold px-3 py-1.5 bg-primary/20 hover:bg-primary/30 border border-primary/30 text-primary rounded-lg transition-all flex items-center gap-1.5"

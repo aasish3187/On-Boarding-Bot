@@ -30,6 +30,7 @@ import {
   ArrowUp,
   Zap
 } from "lucide-react";
+import { API_BASE_URL, WS_BASE_URL } from "../config";
 
 const LeaveRequestWidget = ({ onSubmit, disabled, isDarkMode }) => {
   const [startDate, setStartDate] = useState("");
@@ -558,7 +559,7 @@ export default function ChatScreen({ user, onLogout }) {
 
   const fetchHistory = async () => {
     try {
-      const res = await fetch("http://localhost:8000/api/bot/history", {
+      const res = await fetch(`${API_BASE_URL}/api/bot/history`, {
         headers: {
           "Authorization": `Bearer ${user.token}`
         }
@@ -576,7 +577,7 @@ export default function ChatScreen({ user, onLogout }) {
 
   const resumeThread = async (threadId, status, note = "") => {
     try {
-      const resumeResponse = await fetch(`http://localhost:8000/api/v1/chat/${threadId}/resume`, {
+      const resumeResponse = await fetch(`${API_BASE_URL}/api/v1/chat/${threadId}/resume`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -611,7 +612,7 @@ export default function ChatScreen({ user, onLogout }) {
   useEffect(() => {
     fetchHistory();
 
-    const ws = new WebSocket("ws://localhost:8000/api/ws");
+    const ws = new WebSocket(`${WS_BASE_URL}/api/ws`);
 
     ws.onopen = () => {
       console.log("[WebSocket] Connected in employee view");
@@ -642,7 +643,7 @@ export default function ChatScreen({ user, onLogout }) {
     setIsLoading(true);
 
     try {
-      const response = await fetch("http://localhost:8000/api/bot/chat", {
+      const response = await fetch(`${API_BASE_URL}/api/bot/chat`, {
         method: "POST",
         headers: { 
           "Content-Type": "application/json",
@@ -697,7 +698,7 @@ export default function ChatScreen({ user, onLogout }) {
     setIsLoading(true);
 
     try {
-      const response = await fetch(`http://localhost:8000/api/v1/approvals/${pendingApprovalId}/status`);
+      const response = await fetch(`${API_BASE_URL}/api/v1/approvals/${pendingApprovalId}/status`);
       if (!response.ok) throw new Error("Failed to check status.");
       
       const data = await response.json();
