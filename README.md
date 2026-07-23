@@ -6,19 +6,33 @@
 
 ---
 
-## About
+## About OnboardBot
 
-OnboardBot was created to solve a critical gap in enterprise onboarding: the disconnect between new employees and the scattered systems, policies, and contacts they need to get productive. Traditional onboarding portals are static, HR teams are overwhelmed with repetitive questions, and new hires waste days navigating documentation.
+**OnboardBot** is a state-of-the-art, full-stack AI onboarding portal built to transform how modern enterprises integrate and support new hires. Traditional static employee intranets are static, siloed, and fail to provide immediate support. OnboardBot acts as an intelligent, conversational central nervous system for new employees, guiding them through administrative, technical, and operational tasks during their critical first 90 days.
 
-OnboardBot bridges this gap by providing a single, intelligent conversational interface that:
+---
 
-- **Answers any work-related question** using a comprehensive enterprise knowledge base covering company policies, team structure, office maps, communication tools, benefits, and project workflows
-- **Assists with code corrections and debugging**, acting as a technical mentor for new engineering hires
-- **Automates HR operations** like leave requests, document uploads, IT provisioning, and hardware orders through interactive form widgets embedded directly in the chat
-- **Enforces guardrails** to block personal, inappropriate, or off-topic queries while maintaining a professional workplace environment
-- **Syncs in real-time** with HR administrators through WebSocket-powered live approval notifications
+## The Problem Statement
 
-The system is designed with a multi-agent LangGraph architecture where a supervisor router intelligently directs queries to specialized nodes: a Knowledge RAG node for HR policies, an IT Provisioner for account setup, a General Assistant for code help and general knowledge, and a Guardrail node for content moderation.
+Onboarding a new employee in a modern software MNC involves navigating multiple friction points:
+
+1. **Information Overload and Fragmentation**: Company policies, benefits, floor maps, and team structures are scattered across multiple tools (Confluence, Slack, PDFs, email threads). New hires waste hours looking for basic answers.
+2. **HR Operations Bottleneck**: HR coordinators spend significant time responding to repetitive questions (e.g., "What is the PTO policy?") and manually processing simple workflows (e.g., booking leaves, requesting hardware).
+3. **Developer Setup Friction**: New engineering hires face steep learning curves setting up local environments, understanding Git branching styles, coding standards, and project submission guidelines.
+4. **Data Security and AI Hallucinations**: Standard LLM chat tools often hallucinate policy details (creating compliance/legal risks) or lack guardrails, potentially exposing sensitive corporate data or allowing inappropriate workplace discussions.
+5. **Slow Approval Loops**: Traditional ticketing systems delay critical setup items (like Slack or GitHub access) due to long email loops and asynchronous checks.
+
+---
+
+## How OnboardBot Solves Them
+
+OnboardBot bridges these gaps by providing an all-in-one interactive conversational interface:
+
+- **Strict Knowledge RAG Node**: Uses a verified, enterprise-specific knowledge base to answer company policy, benefits, directory, and facility queries with zero hallucination. If a detail is missing, it points to the specific contact.
+- **Developer Mentorship & MNC Workflow Assistance**: The integrated **General Assistant** node acts as a technical buddy, offering instant code review, syntax debugging, Docker troubleshooting commands, and detailed guidance on Git workflows, Agile processes, sprint structures, and code deployment schedules.
+- **Interactive Inline Widgets**: Replaces fragile natural language extraction with structured forms. When a user requests leave, submits compliance docs, signs NDAs, or provisions IT accounts, interactive widgets (calendars, checklists, signature pads) pop up inside the chat to capture accurate, structured data.
+- **Real-Time HR Dashboard & Live Sync**: Includes a full HR administration portal. All employee form submissions instantly generate cards on a drag-and-drop Kanban Board. Using WebSockets, approval decisions (Approved/Rejected) are pushed instantly back to the employee's chat session.
+- **Safety-First Guardrails**: Implements PII scrubbing (via Presidio) to protect personal identifiers and a designated Guardrail node to filter out non-work topic requests (e.g., relationship advice, politics, medical recommendations).
 
 ---
 
