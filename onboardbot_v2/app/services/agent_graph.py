@@ -146,33 +146,42 @@ Month 3 (Days 61-90):
 
 Required Documents: Signed employment contract, W-4 tax form, direct deposit form, government-issued photo ID, emergency contact information.
 
---- PROJECT SUBMISSION & CODE STANDARDS ---
-Git Workflow:
-  1. Create a feature branch from 'main': git checkout -b feature/your-feature-name
-  2. Write code following the team style guide (ESLint for JS, Black for Python).
-  3. Write tests. Minimum 80% coverage required for new code.
-  4. Push and open a Pull Request on GitHub.
-  5. Request review from at least 2 team members.
-  6. Address review comments and get approvals.
-  7. Merge via "Squash and Merge" to keep history clean.
+--- PROJECT SUBMISSION, CODE STANDARDS & MNC WORKFLOWS ---
+Agile/Scrum Process:
+  - Daily Standup: Held daily at 10:00 AM PT via Google Meet. Report: 1) What you did yesterday, 2) What you will do today, 3) Any blockers.
+  - Sprint Planning: Bi-weekly on Mondays. Sprints are 2 weeks long. Story points are estimated using Fibonacci sequence (1, 2, 3, 5, 8).
+  - Sprint Retrospective: Bi-weekly on Fridays. Team discusses what went well, what could be improved, and action items.
+  - Jira Tickets: Every task must have a Jira ticket (e.g., ENG-123). Transitions: Backlog -> To Do -> In Progress -> In Review -> QA -> Done.
 
-Code Review Checklist:
-  - Does the code follow naming conventions?
-  - Are there sufficient tests?
-  - Is error handling proper?
-  - Are there no hardcoded secrets or credentials?
-  - Is the code performant and free of N+1 queries?
+Git Workflow & PR Process:
+  1. Create a feature branch from 'main': git checkout -b feature/ENG-123-your-feature-name
+  2. Write code following clean code principles (SOLID, DRY) and team style guides (ESLint/Prettier for JS, Black/Flake8 for Python).
+  3. Write tests. Minimum 80% coverage required. Run tests locally using `pytest` or `npm test`.
+  4. Push branch and open a Pull Request (PR) on GitHub.
+  5. Title PR as "ENG-123: Feature description". Provide a clear summary and screenshots of changes.
+  6. Request reviews from at least 2 team members. Address review comments and obtain approvals.
+  7. Once approved and CI/CD checks pass, perform a "Squash and Merge".
 
-Deployment Schedule:
-  - Staging: Continuous deployment from 'develop' branch.
-  - Production: Weekly releases every Tuesday at 2:00 PM PT.
-  - Hotfixes: Can be deployed anytime with on-call engineer approval.
+Code Review & Quality Checklist:
+  - Code Quality: Ensure proper naming conventions, clean functions, modular design, and no dead code.
+  - Testing: Verify unit and integration tests are present and passing.
+  - Security: Absolutely no hardcoded secrets, API keys, or credentials. Use environment variables.
+  - Performance: Optimize SQL queries, avoid N+1 query patterns, and ensure efficient memory usage.
+  - Error Handling: Use proper try/catch blocks and logging (avoid silent failures).
 
-Testing Requirements:
-  - Unit tests: Required for all business logic.
-  - Integration tests: Required for API endpoints.
-  - E2E tests: Required for critical user flows.
-  - Run locally: pytest (Python), npm test (JavaScript).
+CI/CD & Deployment Pipeline:
+  - CI: Every commit triggers GitHub Actions to run linters, tests, and build checks.
+  - CD: Successful merges to 'main' automatically deploy to the Staging environment via ArgoCD.
+  - Production Release: Weekly on Tuesdays at 2:00 PM PT. Requires manager sign-off.
+  - Rollbacks: Triggered via ArgoCD with a single-click revert.
+
+MNC Developer Setup & Troubleshooting:
+  - Local setup: Run `docker-compose up -d` to spin up local database (PostgreSQL/Redis) and caching services.
+  - Common Docker commands: `docker ps` (list containers), `docker logs -f <id>` (tail logs), `docker exec -it <id> sh` (exec shell).
+  - Git troubleshooting: `git merge main` (sync branch), `git stash` (save work temporarily), `git reset --hard HEAD` (discard local changes).
+  - Database queries: Ensure indexes are created on frequently filtered columns. Use EXPLAIN ANALYZE to debug slow SQL queries.
+  - API Standards: Follow RESTful design. Use correct HTTP status codes: 200 (OK), 201 (Created), 400 (Bad Request), 401 (Unauthorized), 404 (Not Found), 500 (Internal Server Error).
+
 """
 
 # ============================================================
