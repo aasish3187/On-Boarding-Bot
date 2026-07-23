@@ -33,6 +33,15 @@ The system is designed with a multi-agent LangGraph architecture where a supervi
 ### Interactive Leave Request Form (Widget)
 ![Leave Request Widget](screenshots/leave_widget.png)
 
+### IT Provisioning Widget
+![IT Provisioning Widget](screenshots/it_widget.png)
+
+### HR Admin Dashboard
+![HR Admin Dashboard](screenshots/hr_dashboard.png)
+
+### Onboarding Kanban Pipeline
+![Onboarding Kanban Pipeline](screenshots/hr_kanban.png)
+
 ---
 
 ## Key Features
