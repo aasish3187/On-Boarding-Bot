@@ -313,7 +313,7 @@ export default function LoginScreen({ onLoginSuccess }) {
           </div>
 
           {/* Form */}
-          <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+          <form onSubmit={handleAuthSubmit} className="flex flex-col gap-4">
             {/* Display error message */}
             {errorMsg && (
               <div className="bg-red-500/20 border border-red-500/40 text-red-200 text-xs p-3 rounded-lg">
