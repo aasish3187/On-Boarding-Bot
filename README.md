@@ -1,8 +1,36 @@
-# OnboardBot -- AI-Powered Enterprise Onboarding Portal
+# 🤖 OnboardBot — AI-Powered Enterprise Onboarding Portal
 
-**OnboardBot** is an intelligent, full-stack employee onboarding assistant built for modern enterprises. Powered by **FastAPI**, **React (Vite)**, **LangGraph**, and **Groq LLaMA 3.1**, it provides new hires with an AI-driven conversational experience that handles everything from HR policy questions and code reviews to leave requests and IT provisioning -- all through a premium, interactive chat interface.
+<p align="center">
+  <a href="https://on-boarding-bot.vercel.app"><img src="https://img.shields.io/badge/🌐_Live_Demo-Vercel-000?style=for-the-badge&logo=vercel" alt="Live Demo" /></a>
+  <a href="https://on-boarding-bot.onrender.com/docs"><img src="https://img.shields.io/badge/📡_API_Docs-Render-46E3B7?style=for-the-badge&logo=render" alt="API Docs" /></a>
+</p>
 
-> Built by **Aasish** | Lumina Systems Engineering
+<p align="center">
+  <img src="https://img.shields.io/badge/FastAPI-009688?style=flat-square&logo=fastapi&logoColor=white" alt="FastAPI" />
+  <img src="https://img.shields.io/badge/React_18-61DAFB?style=flat-square&logo=react&logoColor=black" alt="React" />
+  <img src="https://img.shields.io/badge/Vite-646CFF?style=flat-square&logo=vite&logoColor=white" alt="Vite" />
+  <img src="https://img.shields.io/badge/LangGraph-1C3C3C?style=flat-square&logo=langchain&logoColor=white" alt="LangGraph" />
+  <img src="https://img.shields.io/badge/Groq_LLaMA_3.1-F55036?style=flat-square&logo=meta&logoColor=white" alt="Groq" />
+  <img src="https://img.shields.io/badge/Tailwind_CSS-06B6D4?style=flat-square&logo=tailwindcss&logoColor=white" alt="TailwindCSS" />
+  <img src="https://img.shields.io/badge/WebSocket-010101?style=flat-square&logo=socketdotio&logoColor=white" alt="WebSocket" />
+  <img src="https://img.shields.io/badge/SQLite-003B57?style=flat-square&logo=sqlite&logoColor=white" alt="SQLite" />
+</p>
+
+<p align="center">
+  <img src="https://img.shields.io/github/license/aasish3187/On-Boarding-Bot?style=flat-square&color=blue" alt="License" />
+  <img src="https://img.shields.io/github/stars/aasish3187/On-Boarding-Bot?style=flat-square&color=yellow" alt="Stars" />
+  <img src="https://img.shields.io/github/forks/aasish3187/On-Boarding-Bot?style=flat-square&color=green" alt="Forks" />
+  <img src="https://img.shields.io/github/issues/aasish3187/On-Boarding-Bot?style=flat-square&color=red" alt="Issues" />
+  <img src="https://img.shields.io/github/last-commit/aasish3187/On-Boarding-Bot?style=flat-square&color=purple" alt="Last Commit" />
+  <img src="https://img.shields.io/github/repo-size/aasish3187/On-Boarding-Bot?style=flat-square&color=orange" alt="Repo Size" />
+</p>
+
+---
+
+**OnboardBot** is an intelligent, full-stack employee onboarding assistant built for modern enterprises. Powered by **FastAPI**, **React (Vite)**, **LangGraph**, and **Groq LLaMA 3.1**, it provides new hires with an AI-driven conversational experience that handles everything from HR policy questions and code reviews to leave requests and IT provisioning — all through a premium, interactive chat interface.
+
+> 🏢 Built by **Aasish** | Lumina Systems Engineering  
+> 🔗 **[Live Demo](https://on-boarding-bot.vercel.app)** · **[API Docs](https://on-boarding-bot.onrender.com/docs)** · **[Report Bug](https://github.com/aasish3187/On-Boarding-Bot/issues)** · **[Request Feature](https://github.com/aasish3187/On-Boarding-Bot/issues/new)**
 
 ---
 
@@ -288,8 +316,35 @@ npm run dev
 
 ## License
 
-This project is for educational and demonstration purposes.
+This project is licensed under the **MIT License** — see the [LICENSE](LICENSE) file for details.
+
+[![MIT License](https://img.shields.io/badge/License-MIT-blue.svg?style=for-the-badge)](LICENSE)
 
 ---
 
-**Built with LangGraph, FastAPI, React, and Groq Cloud**
+## Contributing
+
+Contributions are welcome! Please read our [Contributing Guidelines](CONTRIBUTING.md) before getting started.
+
+1. Fork the Project
+2. Create your Feature Branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your Changes (`git commit -m 'feat: add AmazingFeature'`)
+4. Push to the Branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
+
+---
+
+## ⭐ Star History
+
+If you find this project useful, please consider giving it a **star** ⭐ — it helps the project gain visibility!
+
+[![Star History Chart](https://api.star-history.com/svg?repos=aasish3187/On-Boarding-Bot&type=Date)](https://star-history.com/#aasish3187/On-Boarding-Bot&Date)
+
+---
+
+<p align="center">
+  Built with ❤️ using <b>LangGraph</b>, <b>FastAPI</b>, <b>React</b>, and <b>Groq Cloud</b>
+  <br/>
+  <a href="https://on-boarding-bot.vercel.app">Live Demo</a> · <a href="https://github.com/aasish3187/On-Boarding-Bot/issues">Report Bug</a> · <a href="https://github.com/aasish3187/On-Boarding-Bot/issues/new">Request Feature</a>
+</p>
+
