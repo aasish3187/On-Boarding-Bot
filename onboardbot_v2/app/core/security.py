@@ -1,10 +1,13 @@
+import re
 from passlib.context import CryptContext
-from presidio_analyzer import AnalyzerEngine
-from presidio_anonymizer import AnonymizerEngine
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-analyzer = AnalyzerEngine()
-anonymizer = AnonymizerEngine()
+
+EMAIL_REGEX = re.compile(r'[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+')
+PHONE_REGEX = re.compile(r'\b(?:\+\d{1,3}[-.\s]?)?\(?\d{3}\)?[-.\s]?\d{3}[-.\s]?\d{4}\b')
+SSN_REGEX = re.compile(r'\b\d{3}-\d{2}-\d{4}\b')
+IP_REGEX = re.compile(r'\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\b')
+CREDIT_CARD_REGEX = re.compile(r'\b(?:\d[ -]*?){13,16}\b')
 
 def hash_password(password: str) -> str:
     return pwd_context.hash(password)
@@ -13,12 +16,14 @@ def verify_password(plain_password: str, hashed_password: str) -> bool:
     return pwd_context.verify(plain_password, hashed_password)
 
 def scrub_pii(text: str) -> str:
-    target_entities = ["EMAIL_ADDRESS", "PHONE_NUMBER", "US_SSN", "CREDIT_CARD", "IP_ADDRESS"]
-    results = analyzer.analyze(text=text, entities=target_entities, language="en")
-    if not results:
+    if not text:
         return text
-    anonymized = anonymizer.anonymize(text=text, analyzer_results=results)
-    return anonymized.text
+    text = EMAIL_REGEX.sub("<EMAIL_ADDRESS>", text)
+    text = PHONE_REGEX.sub("<PHONE_NUMBER>", text)
+    text = SSN_REGEX.sub("<US_SSN>", text)
+    text = CREDIT_CARD_REGEX.sub("<CREDIT_CARD>", text)
+    text = IP_REGEX.sub("<IP_ADDRESS>", text)
+    return text
 
 from datetime import datetime, timedelta
 from typing import Optional
