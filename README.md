@@ -1,4 +1,4 @@
-# 🤖 OnboardBot — AI-Powered Enterprise Onboarding Portal
+# OnboardBot — AI-Powered Enterprise Onboarding Portal
 
 <p align="center">
   <a href="https://on-boarding-bot.vercel.app"><img src="https://img.shields.io/badge/🌐_Live_Demo-Vercel-000?style=for-the-badge&logo=vercel" alt="Live Demo" /></a>
@@ -334,16 +334,16 @@ Contributions are welcome! Please read our [Contributing Guidelines](CONTRIBUTIN
 
 ---
 
-## ⭐ Star History
+## Star History
 
-If you find this project useful, please consider giving it a **star** ⭐ — it helps the project gain visibility!
+If you find this project useful, please consider giving it a **star** — it helps the project gain visibility!
 
 [![Star History Chart](https://api.star-history.com/svg?repos=aasish3187/On-Boarding-Bot&type=Date)](https://star-history.com/#aasish3187/On-Boarding-Bot&Date)
 
 ---
 
 <p align="center">
-  Built with ❤️ using <b>LangGraph</b>, <b>FastAPI</b>, <b>React</b>, and <b>Groq Cloud</b>
+  Built with using <b>LangGraph</b>, <b>FastAPI</b>, <b>React</b>, and <b>Groq Cloud</b>
   <br/>
   <a href="https://on-boarding-bot.vercel.app">Live Demo</a> · <a href="https://github.com/aasish3187/On-Boarding-Bot/issues">Report Bug</a> · <a href="https://github.com/aasish3187/On-Boarding-Bot/issues/new">Request Feature</a>
 </p>
