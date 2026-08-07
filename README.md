@@ -1,8 +1,9 @@
-# OnboardBot — AI-Powered Enterprise Onboarding Portal
+# OnboardBot - AI-Powered Enterprise Onboarding Portal
 
 <p align="center">
-  <a href="https://on-boarding-bot.vercel.app"><img src="https://img.shields.io/badge/🌐_Live_Demo-Vercel-000?style=for-the-badge&logo=vercel" alt="Live Demo" /></a>
-  <a href="https://on-boarding-bot.onrender.com/docs"><img src="https://img.shields.io/badge/📡_API_Docs-Render-46E3B7?style=for-the-badge&logo=render" alt="API Docs" /></a>
+  <a href="./REPORT.md"><img src="https://img.shields.io/badge/Detailed_Report-Read_Now-FF6600?style=for-the-badge" alt="Detailed Report" /></a>
+  <a href="https://on-boarding-bot.vercel.app"><img src="https://img.shields.io/badge/Live_Demo-Vercel-000?style=for-the-badge" alt="Live Demo" /></a>
+  <a href="https://on-boarding-bot.onrender.com/docs"><img src="https://img.shields.io/badge/API_Docs-Render-46E3B7?style=for-the-badge" alt="API Docs" /></a>
 </p>
 
 <p align="center">
@@ -29,8 +30,8 @@
 
 **OnboardBot** is an intelligent, full-stack employee onboarding assistant built for modern enterprises. Powered by **FastAPI**, **React (Vite)**, **LangGraph**, and **Groq LLaMA 3.1**, it provides new hires with an AI-driven conversational experience that handles everything from HR policy questions and code reviews to leave requests and IT provisioning — all through a premium, interactive chat interface.
 
-> 🏢 Built by **Aasish** | Lumina Systems Engineering  
-> 🔗 **[Live Demo](https://on-boarding-bot.vercel.app)** · **[API Docs](https://on-boarding-bot.onrender.com/docs)** · **[Report Bug](https://github.com/aasish3187/On-Boarding-Bot/issues)** · **[Request Feature](https://github.com/aasish3187/On-Boarding-Bot/issues/new)**
+> Built by **Aasish** | Lumina Systems Engineering  
+> **[Live Demo](https://on-boarding-bot.vercel.app)** | **[API Docs](https://on-boarding-bot.onrender.com/docs)** | **[Report Bug](https://github.com/aasish3187/On-Boarding-Bot/issues)** | **[Request Feature](https://github.com/aasish3187/On-Boarding-Bot/issues/new)**
 
 ---
 
