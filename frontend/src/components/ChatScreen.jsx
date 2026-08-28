@@ -612,27 +612,38 @@ export default function ChatScreen({ user, onLogout }) {
   useEffect(() => {
     fetchHistory();
 
-    const ws = new WebSocket(`${WS_BASE_URL}/api/ws`);
+    let ws;
+    try {
+      ws = new WebSocket(`${WS_BASE_URL}/api/ws`);
 
-    ws.onopen = () => {
-      console.log("[WebSocket] Connected in employee view");
-    };
+      ws.onopen = () => {
+        console.log("[WebSocket] Connected in employee view");
+      };
 
-    ws.onmessage = (event) => {
-      try {
-        const data = JSON.parse(event.data);
-        if (data.type === "approval_decision" && data.employee_id === user.id) {
-          if (data.ticket_id === pendingApprovalId || pendingApprovalId === null) {
-            resumeThread(data.ticket_id, data.status);
+      ws.onmessage = (event) => {
+        try {
+          const data = JSON.parse(event.data);
+          if (data.type === "approval_decision" && data.employee_id === user.id) {
+            if (data.ticket_id === pendingApprovalId || pendingApprovalId === null) {
+              resumeThread(data.ticket_id, data.status);
+            }
           }
+        } catch (e) {
+          console.error("WS error parsing message", e);
         }
-      } catch (e) {
-        console.error("WS error parsing message", e);
-      }
-    };
+      };
+
+      ws.onerror = (err) => {
+        console.warn("[WebSocket] Connection notice:", err);
+      };
+    } catch (err) {
+      console.warn("[WebSocket] Initialization notice:", err);
+    }
 
     return () => {
-      ws.close();
+      if (ws && (ws.readyState === WebSocket.OPEN || ws.readyState === WebSocket.CONNECTING)) {
+        ws.close();
+      }
     };
   }, [user.token, pendingApprovalId]);
 

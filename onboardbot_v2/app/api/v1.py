@@ -59,7 +59,16 @@ def post_v1_chat(payload: V1ChatPayload, db: Session = Depends(get_db)):
         "compliance_passed": False
     }
     
-    final_state = agent_graph.invoke(state)
+    try:
+        final_state = agent_graph.invoke(state)
+    except Exception as e:
+        print(f"[V1 Chat Error] {e}")
+        from app.services.agent_graph import get_knowledge_response
+        fallback_reply = get_knowledge_response(clean_input)
+        final_state = {
+            "messages": messages_list + [{"sender": "knowledge_rag", "content": fallback_reply}],
+            "risk_flag": False
+        }
     
     if final_state.get("risk_flag"):
         approval_id = str(uuid.uuid4())

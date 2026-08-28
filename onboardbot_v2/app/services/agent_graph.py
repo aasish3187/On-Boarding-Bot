@@ -1,16 +1,23 @@
 import os
+import re
 from dotenv import load_dotenv
-load_dotenv() # Load env vars from .env file
+load_dotenv()
 
 from typing import TypedDict, List, Dict, Any, Literal, Optional
 from pydantic import BaseModel, Field
-from langchain_groq import ChatGroq
 from langchain_core.messages import SystemMessage, HumanMessage
 from langgraph.graph import StateGraph, END
 
-
-# Automatically uses GROQ_API_KEY from environment variables
-llm = ChatGroq(model="llama-3.1-8b-instant", temperature=0.1, max_tokens=2048)
+# Safely initialize ChatGroq
+llm = None
+groq_api_key = os.getenv("GROQ_API_KEY", "").strip()
+if groq_api_key:
+    try:
+        from langchain_groq import ChatGroq
+        llm = ChatGroq(model="llama-3.1-8b-instant", temperature=0.1, max_tokens=2048, groq_api_key=groq_api_key)
+    except Exception as e:
+        print(f"[LLM Init Warning] ChatGroq initialization failed: {e}")
+        llm = None
 
 # ============================================================
 # ENTERPRISE KNOWLEDGE BASE
@@ -181,7 +188,6 @@ MNC Developer Setup & Troubleshooting:
   - Git troubleshooting: `git merge main` (sync branch), `git stash` (save work temporarily), `git reset --hard HEAD` (discard local changes).
   - Database queries: Ensure indexes are created on frequently filtered columns. Use EXPLAIN ANALYZE to debug slow SQL queries.
   - API Standards: Follow RESTful design. Use correct HTTP status codes: 200 (OK), 201 (Created), 400 (Bad Request), 401 (Unauthorized), 404 (Not Found), 500 (Internal Server Error).
-
 """
 
 # ============================================================
@@ -222,11 +228,163 @@ class LeaveIntentCheck(BaseModel):
     )
 
 # ============================================================
+# KNOWLEDGE BASE FALLBACK ENGINE
+# ============================================================
+
+def get_knowledge_response(query: str, category: str = "general") -> str:
+    """Smart knowledge extraction fallback when LLM is unavailable."""
+    q = query.lower()
+    
+    # 1. Core hours & Working Hours
+    if any(k in q for k in ["core hour", "working hour", "work hour", "hours of work", "shift", "overtime", "work schedule"]):
+        return (
+            "**Lumina Systems Working Hours Policy**:\n\n"
+            "- **Core Hours**: 10:00 AM to 4:00 PM (local time). Employees have flexible start and end times outside core hours.\n"
+            "- **Standard Week**: 40 hours per week, Monday through Friday.\n"
+            "- **Overtime**: Requires prior manager pre-approval.\n"
+            "- **Daily Standup**: Held daily at 10:00 AM PT via Google Meet."
+        )
+        
+    # 2. Leave Policy / PTO / Vacation / Sick / Parental
+    if any(k in q for k in ["leave", "pto", "paid time off", "sick", "parental", "maternity", "paternity", "bereavement", "jury", "vacation"]):
+        return (
+            "**Lumina Systems Leave & Time Off Policies**:\n\n"
+            "- **Paid Time Off (PTO)**: 20 days per year (accrues monthly).\n"
+            "- **Sick Leave**: 10 days per year (no doctor's note needed for 1-2 days).\n"
+            "- **Parental Leave**: 16 weeks fully paid (birth parent), 8 weeks fully paid (non-birth parent).\n"
+            "- **Bereavement**: 5 days for immediate family, 3 days for extended family.\n"
+            "- **Jury Duty**: Fully paid for the duration.\n"
+            "- **Personal Leave**: Up to 30 days unpaid (manager and HR approval required).\n\n"
+            "To submit a formal leave request, click **Request Leave** in the chat menu or type *'I want to request leave'*."
+        )
+
+    # 3. Remote Work & Hybrid Stipend
+    if any(k in q for k in ["remote", "hybrid", "work from home", "wfh", "stipend", "in-office"]):
+        return (
+            "**Lumina Systems Remote & Hybrid Work Policy**:\n\n"
+            "- **Hybrid Model**: 3 days in-office (Tuesday, Wednesday, Thursday), 2 days remote (Monday, Friday).\n"
+            "- **Home Office Stipend**: One-time $500 stipend for equipment and ergonomic desk setup.\n"
+            "- **Full Remote Exceptions**: Requires VP-level approval."
+        )
+
+    # 4. Benefits / Insurance / 401k / Wellness
+    if any(k in q for k in ["insurance", "health", "medical", "dental", "vision", "benefit", "401k", "retirement", "wellness", "gym", "eap"]):
+        return (
+            "**Lumina Systems Benefits & Wellness Program**:\n\n"
+            "- **Health Insurance**: Comprehensive medical, dental, and vision coverage through Aetna. 100% covered for employees, 80% covered for dependents.\n"
+            "- **Retirement**: 401(k) with 100% company match up to 4% of base salary.\n"
+            "- **Wellness Stipend**: $1,200/year for gym memberships, fitness apps, and mental health services.\n"
+            "- **Learning & Development**: $2,000/year for technical courses, certifications, and conferences.\n"
+            "- **On-Site Gym**: Floor B1 (open 6:00 AM - 10:00 PM) with showers and lockers.\n"
+            "- **Employee Assistance Program (EAP)**: Free confidential 24/7 counseling hotline at **1-800-555-0199**."
+        )
+
+    # 5. Office Location & Floor Maps
+    if any(k in q for k in ["office", "location", "floor", "map", "headquarter", "cafeteria", "san francisco", "new york", "london", "bangalore"]):
+        return (
+            "**Office Locations & Floor Directory**:\n\n"
+            "**San Francisco HQ (1200 Market Street, San Francisco, CA 94103)**:\n"
+            "- **Floor B1**: Cafeteria, Gym, Recreation Lounge, Bike Storage\n"
+            "- **Floor 1**: Reception, HR Department, Conference Rooms A-D, Visitor Lounge\n"
+            "- **Floor 2**: Design & Product Team, UX Lab, Presentation Theater\n"
+            "- **Floor 3**: Engineering Department, Server Room, Innovation Lab\n"
+            "- **Floor 4**: Executive Offices, Board Room, Legal & Finance\n"
+            "- **Floor 5**: Sales & Marketing, Customer Success, Rooftop Terrace\n\n"
+            "**Branch Offices**: New York (350 5th Ave), London (25 Old Broad St), Bangalore (Prestige Tech Park)."
+        )
+
+    # 6. Team Structure & Key Contacts
+    if any(k in q for k in ["contact", "manager", "lead", "vp", "email", "phone", "extension", "who is", "sarah jenkins", "michael torres"]):
+        return (
+            "**Key Contacts Directory**:\n\n"
+            "- **Engineering**:\n"
+            "  - VP of Engineering: Michael Torres (m.torres@luminasystems.com, Ext: 3001)\n"
+            "  - Engineering Manager: Priya Sharma (p.sharma@luminasystems.com, Ext: 3010)\n"
+            "  - Backend Tech Lead: James Chen (j.chen@luminasystems.com, Ext: 3015)\n"
+            "  - Frontend Tech Lead: Emma Rodriguez (e.rodriguez@luminasystems.com, Ext: 3020)\n"
+            "  - DevOps Lead: Kevin Park (k.park@luminasystems.com, Ext: 3025)\n"
+            "- **HR & People Ops**:\n"
+            "  - HR Director: Sarah Jenkins (s.jenkins@luminasystems.com, Ext: 1001)\n"
+            "  - HR Coordinator: David Martinez (d.martinez@luminasystems.com, Ext: 1010)\n"
+            "- **Design**:\n"
+            "  - Head of Design: Lisa Wang (l.wang@luminasystems.com, Ext: 2001)\n"
+            "- **IT Help Desk**: Direct line Ext: 5555 or +1-415-555-5555."
+        )
+
+    # 7. IT / VPN / 2FA / Passwords / Security
+    if any(k in q for k in ["vpn", "cisco", "password", "2fa", "mfa", "github", "slack", "help desk", "it support", "security"]):
+        return (
+            "**IT Systems & Security Guidelines**:\n\n"
+            "- **VPN**: Cisco AnyConnect (download via `vpn.luminasystems.com` with LDAP login).\n"
+            "- **Two-Factor Authentication (2FA)**: Mandatory for all systems (Google Authenticator / Yubikey).\n"
+            "- **Password Policy**: Minimum 12 characters (uppercase, lowercase, number, symbol), rotated every 90 days.\n"
+            "- **GitHub Access**: Request repository access under `github.com/lumina-systems`.\n"
+            "- **IT Help Desk**: Ext 5555 or `helpdesk@luminasystems.com`.\n"
+            "- **Security Incidents**: Contact `security@luminasystems.com` or Ext 5500 immediately."
+        )
+
+    # 8. Onboarding Milestones & Paperwork
+    if any(k in q for k in ["onboard", "milestone", "week 1", "day 1", "30 day", "60 day", "90 day", "document", "paperwork", "w-4", "contract"]):
+        return (
+            "**Employee Onboarding Milestones & Required Documents**:\n\n"
+            "- **Week 1**: Complete HR paperwork (Signed contract, W-4, Direct Deposit, Photo ID), set up IT accounts (Slack, GitHub, VPN, Jira), meet your team and buddy.\n"
+            "- **Weeks 2-4**: Complete compliance training modules, set up local dev environment, 1:1 with manager.\n"
+            "- **Month 2**: Contribute to starter projects/bug fixes, cross-functional meetings, security training.\n"
+            "- **Month 3**: Feature ownership, 90-day review with manager, onboarding feedback survey."
+        )
+
+    # 9. Agile / Git PR Workflow / Project Submission
+    if any(k in q for k in ["git", "pr", "pull request", "branch", "agile", "scrum", "standup", "sprint", "jira", "deploy", "argocd", "commit"]):
+        return (
+            "**Engineering Agile & Git PR Workflow**:\n\n"
+            "1. **Agile**: Daily standups at 10:00 AM PT via Google Meet. 2-week sprint cadence.\n"
+            "2. **Branching**: Create feature branch from `main`: `git checkout -b feature/ENG-123-feature-name`.\n"
+            "3. **Code & Tests**: Ensure clean code (SOLID, DRY) and minimum 80% test coverage (`pytest` / `npm test`).\n"
+            "4. **Pull Request**: Open PR titled `ENG-123: Description`. Provide summary and test proof. Get approval from at least 2 team reviewers.\n"
+            "5. **Merge & Deploy**: Perform 'Squash and Merge'. Merges to `main` auto-deploy to Staging via ArgoCD. Production release is weekly on Tuesdays at 2:00 PM PT."
+        )
+
+    # 10. Code Review / Programming Help
+    if any(k in q for k in ["code", "python", "javascript", "react", "fastapi", "sql", "bug", "debug", "function"]):
+        return (
+            "**Code Standards & Engineering Best Practices**:\n\n"
+            "- **Modularity**: Keep functions small, testable, and focused on a single responsibility.\n"
+            "- **Testing**: Maintain >80% test coverage for new endpoints and business logic.\n"
+            "- **Security**: Never commit secrets or API keys; load them from environment variables.\n"
+            "- **Database Queries**: Avoid N+1 queries by using joined loads or batching; add proper indexing.\n"
+            "- **Error Handling**: Use explicit exceptions and status codes (200, 201, 400, 401, 404, 500).\n\n"
+            "Feel free to paste any specific code snippet or error message here for structured debugging assistance."
+        )
+
+    # Default Greeting / Overview
+    return (
+        "Hello! I am **OnboardBot**, your AI onboarding and enterprise assistant at Lumina Systems.\n\n"
+        "I can help you with:\n"
+        "- **HR Policies & Benefits**: Leave requests, PTO, health insurance, 401(k), wellness stipends.\n"
+        "- **IT Provisioning**: Slack, GitHub, VPN setup, hardware orders (MacBook Pro / Dell XPS).\n"
+        "- **Office & Team**: Floor maps, departments, manager extensions, communication channels.\n"
+        "- **Engineering**: Git PR workflows, Agile standups, code reviews, and project submissions.\n\n"
+        "How can I assist you today?"
+    )
+
+def safe_llm_invoke(messages_or_prompt: Any, fallback_query: str, category: str = "general") -> str:
+    """Invokes LLM with automatic error catching and knowledge base fallback."""
+    if llm is not None:
+        try:
+            response = llm.invoke(messages_or_prompt)
+            if hasattr(response, "content") and response.content:
+                return str(response.content)
+            return str(response)
+        except Exception as e:
+            print(f"[LLM Invoke Notice] LLM fallback active: {e}")
+    return get_knowledge_response(fallback_query, category)
+
+# ============================================================
 # SUPERVISOR ROUTER
 # ============================================================
 
 def supervisor_router(state: OnboardState) -> Dict[str, Any]:
-    last_msg = state["messages"][-1]["content"]
+    last_msg = state["messages"][-1]["content"] if state["messages"] else ""
     
     # Direct action routing for form submissions (bypass LLM)
     if last_msg.startswith("ACTION:SUBMIT_LEAVE|") or last_msg.startswith("ACTION:SUBMIT_DOC|") or last_msg.startswith("ACTION:SUBMIT_SIGNATURE|"):
@@ -234,52 +392,54 @@ def supervisor_router(state: OnboardState) -> Dict[str, Any]:
     if last_msg.startswith("ACTION:SUBMIT_IT|") or last_msg.startswith("ACTION:SUBMIT_HARDWARE|"):
         return {"next_node": "it_provisioner"}
         
-    try:
-        structured_llm = llm.with_structured_output(RoutingDecision)
-        
-        # Build recent conversation context for better routing
-        recent_msgs = state["messages"][-5:]
-        history_str = "\n".join([f"{msg['sender']}: {msg['content']}" for msg in recent_msgs])
-        
-        prompt = (
-            "You are a routing assistant for an enterprise onboarding chatbot at Lumina Systems.\n"
-            "Analyze the user's latest message in context and route it to the correct handler.\n\n"
-            "CRITICAL RULES:\n"
-            "- If the user asks ABOUT policies, benefits, leave rules, or onboarding info -> 'knowledge_rag'\n"
-            "- If the user wants to REQUEST leave, submit documents, or handle HR forms -> 'knowledge_rag'\n"
-            "- If the user wants to SET UP accounts, request software access, or order hardware -> 'it_provisioner'\n"
-            "- If the user asks for code help, debugging, team contacts, office directions, meeting setup, "
-            "phone numbers, project submission, git workflow, or any general work question -> 'general_assistant'\n"
-            "- If the user asks personal questions (dating, relationships), offensive content, "
-            "political opinions, or inappropriate requests -> 'guardrail_blocked'\n\n"
-            f"Conversation:\n{history_str}\n\n"
-            f"Latest message to route: {last_msg}"
-        )
-        decision = structured_llm.invoke(prompt)
-        return {"next_node": decision.next_node}
-    except Exception as e:
-        print(f"[Router Exception] {e}")
-        # Keyword-based fallback
-        text = last_msg.lower()
-        if any(k in text for k in ["setup", "account", "slack", "provision", "hardware", "laptop"]):
-            return {"next_node": "it_provisioner"}
-        if any(k in text for k in ["policy", "leave", "insurance", "benefit", "pto", "sick", "parental"]):
-            return {"next_node": "knowledge_rag"}
-        return {"next_node": "general_assistant"}
+    if llm is not None:
+        try:
+            structured_llm = llm.with_structured_output(RoutingDecision)
+            recent_msgs = state["messages"][-5:]
+            history_str = "\n".join([f"{msg['sender']}: {msg['content']}" for msg in recent_msgs])
+            
+            prompt = (
+                "You are a routing assistant for an enterprise onboarding chatbot at Lumina Systems.\n"
+                "Analyze the user's latest message in context and route it to the correct handler.\n\n"
+                "CRITICAL RULES:\n"
+                "- If the user asks ABOUT policies, benefits, leave rules, or onboarding info -> 'knowledge_rag'\n"
+                "- If the user wants to REQUEST leave, submit documents, or handle HR forms -> 'knowledge_rag'\n"
+                "- If the user wants to SET UP accounts, request software access, or order hardware -> 'it_provisioner'\n"
+                "- If the user asks for code help, debugging, team contacts, office directions, meeting setup, "
+                "phone numbers, project submission, git workflow, or any general work question -> 'general_assistant'\n"
+                "- If the user asks personal questions (dating, relationships), offensive content, "
+                "political opinions, or inappropriate requests -> 'guardrail_blocked'\n\n"
+                f"Conversation:\n{history_str}\n\n"
+                f"Latest message to route: {last_msg}"
+            )
+            decision = structured_llm.invoke(prompt)
+            return {"next_node": decision.next_node}
+        except Exception as e:
+            print(f"[Router Notice] Rule-based routing active: {e}")
+
+    # Robust Keyword-based fallback routing
+    text = last_msg.lower()
+    if any(k in text for k in ["setup", "account", "slack", "provision", "hardware", "laptop", "monitor", "peripheral", "it ticket", "vpn access"]):
+        return {"next_node": "it_provisioner"}
+    if any(k in text for k in ["policy", "leave", "insurance", "benefit", "pto", "sick", "parental", "vacation", "stipend", "hr", "w-4", "contract"]):
+        return {"next_node": "knowledge_rag"}
+    if any(k in text for k in ["date me", "dating", "kill", "political party", "relationship advice"]):
+        return {"next_node": "guardrail_blocked"}
+    return {"next_node": "general_assistant"}
 
 # ============================================================
 # KNOWLEDGE RAG NODE (HR Policies, Leave, Benefits)
 # ============================================================
 
 def knowledge_rag_node(state: OnboardState) -> Dict[str, Any]:
-    query = state["messages"][-1]["content"]
+    query = state["messages"][-1]["content"] if state["messages"] else ""
     
     # Handle form submissions
     if query.startswith("ACTION:SUBMIT_LEAVE|"):
         try:
             parts = query.split("|")
-            days = parts[1].split(":")[1]
-            reason = parts[2].split(":")[1]
+            days = parts[1].split(":")[1] if len(parts) > 1 else "requested days"
+            reason = parts[2].split(":")[1] if len(parts) > 2 else "personal"
             return {
                 "messages": state["messages"] + [{"sender": "knowledge_rag", "content": f"I've logged your request for {days} due to {reason}. Sending to HR for approval."}],
                 "risk_flag": True,
@@ -291,7 +451,7 @@ def knowledge_rag_node(state: OnboardState) -> Dict[str, Any]:
 
     if query.startswith("ACTION:SUBMIT_DOC|"):
         try:
-            filename = query.split("|")[1].split(":")[1]
+            filename = query.split("|")[1].split(":")[1] if len(query.split("|")) > 1 else "document"
             return {
                 "messages": state["messages"] + [{"sender": "knowledge_rag", "content": f"Document '{filename}' has been uploaded and logged. HR will verify it within 1-2 business days."}],
                 "risk_flag": False,
@@ -307,7 +467,7 @@ def knowledge_rag_node(state: OnboardState) -> Dict[str, Any]:
             "next_node": "compliance_auditor"
         }
 
-    # Check if user wants to TAKE leave (not just ask about it)
+    # Check if user wants to TAKE leave (trigger widget)
     text_lower = query.lower()
     leave_action_keywords = ["request leave", "apply for leave", "take leave", "take time off", 
                              "take days off", "book leave", "submit leave", "want leave",
@@ -316,23 +476,29 @@ def knowledge_rag_node(state: OnboardState) -> Dict[str, Any]:
     is_leave_action = any(kw in text_lower for kw in leave_action_keywords)
     
     if is_leave_action:
-        # Double-check with LLM for edge cases
-        try:
-            structured_llm = llm.with_structured_output(LeaveIntentCheck)
-            check = structured_llm.invoke(
-                f"The user said: '{query}'\n\n"
-                "Is the user explicitly trying to REQUEST/SUBMIT a leave application right now? "
-                "Or are they just asking about how leave works, leave policy, or how many days they have? "
-                "Only return true if they clearly want to file a leave request."
-            )
-            if check.wants_to_take_leave:
-                return {
-                    "messages": state["messages"] + [{"sender": "knowledge_rag", "content": "WIDGET:LEAVE_FORM"}],
-                    "risk_flag": False,
-                    "next_node": "compliance_auditor"
-                }
-        except Exception as e:
-            print(f"[Leave Intent Check Exception] {e}")
+        if llm is not None:
+            try:
+                structured_llm = llm.with_structured_output(LeaveIntentCheck)
+                check = structured_llm.invoke(
+                    f"The user said: '{query}'\n\n"
+                    "Is the user explicitly trying to REQUEST/SUBMIT a leave application right now? "
+                    "Or are they just asking about how leave works, leave policy, or how many days they have? "
+                    "Only return true if they clearly want to file a leave request."
+                )
+                if check.wants_to_take_leave:
+                    return {
+                        "messages": state["messages"] + [{"sender": "knowledge_rag", "content": "WIDGET:LEAVE_FORM"}],
+                        "risk_flag": False,
+                        "next_node": "compliance_auditor"
+                    }
+            except Exception as e:
+                print(f"[Leave Intent Check Exception] {e}")
+        else:
+            return {
+                "messages": state["messages"] + [{"sender": "knowledge_rag", "content": "WIDGET:LEAVE_FORM"}],
+                "risk_flag": False,
+                "next_node": "compliance_auditor"
+            }
 
     # Standard RAG: answer from enterprise knowledge base
     history_str = "\n".join([f"{msg['sender']}: {msg['content']}" for msg in state["messages"][-6:]])
@@ -352,9 +518,9 @@ def knowledge_rag_node(state: OnboardState) -> Dict[str, Any]:
         "- If the user asks about leave POLICY (not requesting leave), explain the policy details."
     )
     
-    response = llm.invoke(prompt)
+    response_content = safe_llm_invoke(prompt, fallback_query=query, category="hr_policy")
     return {
-        "messages": state["messages"] + [{"sender": "knowledge_rag", "content": response.content}],
+        "messages": state["messages"] + [{"sender": "knowledge_rag", "content": response_content}],
         "next_node": "compliance_auditor"
     }
 
@@ -363,12 +529,12 @@ def knowledge_rag_node(state: OnboardState) -> Dict[str, Any]:
 # ============================================================
 
 def it_provisioner_node(state: OnboardState) -> Dict[str, Any]:
-    query = state["messages"][-1]["content"]
+    query = state["messages"][-1]["content"] if state["messages"] else ""
     
     if query.startswith("ACTION:SUBMIT_IT|"):
         try:
             parts = query.split("|")
-            tools = parts[1].split(":")[1]
+            tools = parts[1].split(":")[1] if len(parts) > 1 else "Standard Tools"
             return {
                 "messages": state["messages"] + [{"sender": "it_provisioner", "content": f"I've registered your request for access to: {tools}. Escalating to HR for approval."}],
                 "risk_flag": True,
@@ -401,7 +567,7 @@ def it_provisioner_node(state: OnboardState) -> Dict[str, Any]:
 # ============================================================
 
 def general_assistant_node(state: OnboardState) -> Dict[str, Any]:
-    query = state["messages"][-1]["content"]
+    query = state["messages"][-1]["content"] if state["messages"] else ""
     
     history_str = "\n".join([f"{msg['sender']}: {msg['content']}" for msg in state["messages"][-8:]])
     
@@ -424,12 +590,13 @@ def general_assistant_node(state: OnboardState) -> Dict[str, Any]:
         "- If a question involves company-specific info not in the knowledge base, say so and suggest who to ask."
     )
     
-    response = llm.invoke([
+    llm_messages = [
         SystemMessage(content=prompt),
         HumanMessage(content=query)
-    ])
+    ]
+    response_content = safe_llm_invoke(llm_messages, fallback_query=query, category="general")
     return {
-        "messages": state["messages"] + [{"sender": "general_assistant", "content": response.content}],
+        "messages": state["messages"] + [{"sender": "general_assistant", "content": response_content}],
         "next_node": "compliance_auditor"
     }
 

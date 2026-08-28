@@ -153,25 +153,36 @@ export default function DashboardScreen({ user, onLogout }) {
   useEffect(() => {
     fetchPendingApprovals();
 
-    const ws = new WebSocket(`${WS_BASE_URL}/api/ws`);
+    let ws;
+    try {
+      ws = new WebSocket(`${WS_BASE_URL}/api/ws`);
 
-    ws.onopen = () => {
-      console.log("[WebSocket] Connected in HR view");
-    };
+      ws.onopen = () => {
+        console.log("[WebSocket] Connected in HR view");
+      };
 
-    ws.onmessage = (event) => {
-      try {
-        const data = JSON.parse(event.data);
-        if (data.type === "approval_created") {
-          fetchPendingApprovals();
+      ws.onmessage = (event) => {
+        try {
+          const data = JSON.parse(event.data);
+          if (data.type === "approval_created") {
+            fetchPendingApprovals();
+          }
+        } catch (e) {
+          console.error("WS error parsing message", e);
         }
-      } catch (e) {
-        console.error("WS error parsing message", e);
-      }
-    };
+      };
+
+      ws.onerror = (err) => {
+        console.warn("[WebSocket] HR view connection notice:", err);
+      };
+    } catch (err) {
+      console.warn("[WebSocket] HR view initialization notice:", err);
+    }
 
     return () => {
-      ws.close();
+      if (ws && (ws.readyState === WebSocket.OPEN || ws.readyState === WebSocket.CONNECTING)) {
+        ws.close();
+      }
     };
   }, []);
 

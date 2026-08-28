@@ -51,7 +51,16 @@ def bot_chat(payload: ChatPayload, current_user: User = Depends(get_current_user
         "compliance_passed": False
     }
     
-    final_state = agent_graph.invoke(state)
+    try:
+        final_state = agent_graph.invoke(state)
+    except Exception as e:
+        print(f"[Bot Chat Error] {e}")
+        from app.services.agent_graph import get_knowledge_response
+        fallback_reply = get_knowledge_response(clean_input)
+        final_state = {
+            "messages": messages_list + [{"sender": "knowledge_rag", "content": fallback_reply}],
+            "risk_flag": False
+        }
     
     if final_state.get("risk_flag"):
         ticket_id = str(uuid.uuid4())
